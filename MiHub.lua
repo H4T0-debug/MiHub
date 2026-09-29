@@ -881,15 +881,16 @@ ModeDropdownBtn.Parent = ModeFrame
 local UICornerMode = Instance.new("UICorner")
 UICornerMode.CornerRadius = UDim.new(0, 5)
 UICornerMode.Parent = ModeDropdownBtn
+
 local ModeMenu = Instance.new("Frame")
 ModeMenu.Name = "ModeMenu"
-ModeMenu.Size = UDim2.new(0, 120, 0, 52)
-ModeMenu.Position = UDim2.new(0, 105, 1, 2)
+ModeMenu.Size = UDim2.new(0, 120, 0, 0)
 ModeMenu.BackgroundColor3 = Color3.fromRGB(25, 25, 32)
 ModeMenu.BorderSizePixel = 0
 ModeMenu.Visible = false
-ModeMenu.ZIndex = 50
-ModeMenu.Parent = ModeFrame
+ModeMenu.ClipsDescendants = true
+ModeMenu.ZIndex = 100
+ModeMenu.Parent = MainFrame
 local UICornerMenu = Instance.new("UICorner")
 UICornerMenu.CornerRadius = UDim.new(0, 5)
 UICornerMenu.Parent = ModeMenu
@@ -901,6 +902,11 @@ local UIListMenu = Instance.new("UIListLayout")
 UIListMenu.SortOrder = Enum.SortOrder.LayoutOrder
 UIListMenu.Padding = UDim.new(0, 2)
 UIListMenu.Parent = ModeMenu
+local UIPaddingMenu = Instance.new("UIPadding")
+UIPaddingMenu.PaddingTop = UDim.new(0, 2)
+UIPaddingMenu.PaddingBottom = UDim.new(0, 2)
+UIPaddingMenu.Parent = ModeMenu
+
 local AutoModeBtn = Instance.new("TextButton")
 AutoModeBtn.Size = UDim2.new(1, 0, 0, 24)
 AutoModeBtn.BackgroundTransparency = 1
@@ -908,7 +914,7 @@ AutoModeBtn.Text = "Auto"
 AutoModeBtn.TextColor3 = Color3.fromRGB(255, 255, 255)
 AutoModeBtn.TextSize = 12
 AutoModeBtn.Font = Enum.Font.Gotham
-AutoModeBtn.ZIndex = 51
+AutoModeBtn.ZIndex = 101
 AutoModeBtn.Parent = ModeMenu
 local ManualModeBtn = Instance.new("TextButton")
 ManualModeBtn.Size = UDim2.new(1, 0, 0, 24)
@@ -917,20 +923,84 @@ ManualModeBtn.Text = "Manual"
 ManualModeBtn.TextColor3 = Color3.fromRGB(255, 255, 255)
 ManualModeBtn.TextSize = 12
 ManualModeBtn.Font = Enum.Font.Gotham
-ManualModeBtn.ZIndex = 51
+ManualModeBtn.ZIndex = 101
 ManualModeBtn.Parent = ModeMenu
+
+local ModeMenuOpen = false
+local ModeMenuTween = nil
+
+local function ToggleModeMenu()
+	if ModeMenuTween then
+		ModeMenuTween:Cancel()
+		ModeMenuTween = nil
+	end
+
+	local absPos = ModeDropdownBtn.AbsolutePosition
+	local absSize = ModeDropdownBtn.AbsoluteSize
+	local mainAbsPos = MainFrame.AbsolutePosition
+
+	local targetX = absPos.X - mainAbsPos.X
+	local targetY = absPos.Y - mainAbsPos.Y + absSize.Y + 2
+
+	ModeMenu.Position = UDim2.new(0, targetX, 0, targetY)
+
+	if ModeMenuOpen then
+		ModeMenuOpen = false
+		ModeMenuTween = TweenService:Create(ModeMenu, TweenInfo.new(0.18, Enum.EasingStyle.Quad, Enum.EasingDirection.In), {
+			Size = UDim2.new(0, 120, 0, 0)
+		})
+		ModeMenuTween:Play()
+		ModeMenuTween.Completed:Connect(function()
+			if not ModeMenuOpen then
+				ModeMenu.Visible = false
+			end
+		end)
+	else
+		ModeMenuOpen = true
+		ModeMenu.Visible = true
+		ModeMenu.Size = UDim2.new(0, 120, 0, 0)
+		ModeMenuTween = TweenService:Create(ModeMenu, TweenInfo.new(0.22, Enum.EasingStyle.Quad, Enum.EasingDirection.Out), {
+			Size = UDim2.new(0, 120, 0, 54)
+		})
+		ModeMenuTween:Play()
+	end
+end
+
 ModeDropdownBtn.MouseButton1Click:Connect(function()
-ModeMenu.Visible = not ModeMenu.Visible
+	ToggleModeMenu()
 end)
+
 AutoModeBtn.MouseButton1Click:Connect(function()
-getgenv().AutoKillMode = "Auto"
-ModeDropdownBtn.Text = "Auto v"
-ModeMenu.Visible = false
+	getgenv().AutoKillMode = "Auto"
+	ModeDropdownBtn.Text = "Auto v"
+	if ModeMenuOpen then
+		ToggleModeMenu()
+	end
 end)
 ManualModeBtn.MouseButton1Click:Connect(function()
-getgenv().AutoKillMode = "Manual"
-ModeDropdownBtn.Text = "Manual v"
-ModeMenu.Visible = false
+	getgenv().AutoKillMode = "Manual"
+	ModeDropdownBtn.Text = "Manual v"
+	if ModeMenuOpen then
+		ToggleModeMenu()
+	end
+end)
+
+UserInputService.InputBegan:Connect(function(input, gameProcessed)
+	if gameProcessed then return end
+	if ModeMenuOpen and (input.UserInputType == Enum.UserInputType.MouseButton1 or input.UserInputType == Enum.UserInputType.Touch) then
+		local mousePos = UserInputService:GetMouseLocation()
+		local menuPos = ModeMenu.AbsolutePosition
+		local menuSize = ModeMenu.AbsoluteSize
+		local btnPos = ModeDropdownBtn.AbsolutePosition
+		local btnSize = ModeDropdownBtn.AbsoluteSize
+
+		local insideMenu = mousePos.X >= menuPos.X and mousePos.X <= menuPos.X + menuSize.X and mousePos.Y >= menuPos.Y and mousePos.Y <= menuPos.Y + menuSize.Y
+		local insideBtn = mousePos.X >= btnPos.X and mousePos.X <= btnPos.X + btnSize.X and mousePos.Y >= btnPos.Y and mousePos.Y <= btnPos.Y + btnSize.Y
+
+		if not insideMenu and not insideBtn then
+			ToggleModeMenu()
+		end
+	end
 end)
 
 local FPSTabBtn = Instance.new("TextButton")
@@ -990,6 +1060,7 @@ local UICornerMiscTab = Instance.new("UICorner")
 UICornerMiscTab.CornerRadius = UDim.new(0, 5)
 UICornerMiscTab.Parent = MiscTabBtn
 FPSTabBtn.MouseButton1Click:Connect(function()
+if ModeMenuOpen then ToggleModeMenu() end
 FPSTab.Visible = true
 AutoTab.Visible = false
 AimTab.Visible = false
@@ -1004,6 +1075,7 @@ MiscTabBtn.BackgroundColor3 = Color3.fromRGB(28, 28, 35)
 MiscTabBtn.TextColor3 = Color3.fromRGB(180, 180, 180)
 end)
 AutoTabBtn.MouseButton1Click:Connect(function()
+if ModeMenuOpen then ToggleModeMenu() end
 FPSTab.Visible = false
 AutoTab.Visible = true
 AimTab.Visible = false
@@ -1018,6 +1090,7 @@ MiscTabBtn.BackgroundColor3 = Color3.fromRGB(28, 28, 35)
 MiscTabBtn.TextColor3 = Color3.fromRGB(180, 180, 180)
 end)
 AimTabBtn.MouseButton1Click:Connect(function()
+if ModeMenuOpen then ToggleModeMenu() end
 FPSTab.Visible = false
 AutoTab.Visible = false
 AimTab.Visible = true
@@ -1032,6 +1105,7 @@ MiscTabBtn.BackgroundColor3 = Color3.fromRGB(28, 28, 35)
 MiscTabBtn.TextColor3 = Color3.fromRGB(180, 180, 180)
 end)
 MiscTabBtn.MouseButton1Click:Connect(function()
+if ModeMenuOpen then ToggleModeMenu() end
 FPSTab.Visible = false
 AutoTab.Visible = false
 AimTab.Visible = false
