@@ -3,12 +3,13 @@ local UserInputService = game:GetService("UserInputService")
 local TweenService = game:GetService("TweenService")
 local UserGameSettings = UserSettings():GetService("UserGameSettings")
 local RunService = game:GetService("RunService")
+local CoreGui = game:GetService("CoreGui")
 local LocalPlayer = Players.LocalPlayer
-local PlayerGui = LocalPlayer:WaitForChild("PlayerGui")
 local ScreenGui = Instance.new("ScreenGui")
 ScreenGui.Name = "MiHubGui"
 ScreenGui.ResetOnSpawn = false
-ScreenGui.Parent = PlayerGui
+ScreenGui.ZIndexBehavior = Enum.ZIndexBehavior.Sibling
+ScreenGui.Parent = CoreGui
 local NoRenderOverlay = Instance.new("ImageLabel")
 NoRenderOverlay.Name = "NoRenderOverlay"
 NoRenderOverlay.Size = UDim2.new(1, 0, 1, 0)
@@ -182,15 +183,26 @@ FPSTab.ScaleType = Enum.ScaleType.Crop
 FPSTab.Visible = true
 FPSTab.ZIndex = 11
 FPSTab.Parent = Container
+local FPSScroll = Instance.new("ScrollingFrame")
+FPSScroll.Name = "FPSScroll"
+FPSScroll.Size = UDim2.new(1, 0, 1, 0)
+FPSScroll.BackgroundTransparency = 1
+FPSScroll.BorderSizePixel = 0
+FPSScroll.ScrollBarThickness = 4
+FPSScroll.ScrollBarImageColor3 = Color3.fromRGB(255, 0, 40)
+FPSScroll.CanvasSize = UDim2.new(0, 0, 0, 0)
+FPSScroll.AutomaticCanvasSize = Enum.AutomaticSize.Y
+FPSScroll.ZIndex = 11
+FPSScroll.Parent = FPSTab
 local FPSPadding = Instance.new("UIPadding")
 FPSPadding.PaddingTop = UDim.new(0, 10)
 FPSPadding.PaddingLeft = UDim.new(0, 15)
 FPSPadding.PaddingRight = UDim.new(0, 15)
-FPSPadding.Parent = FPSTab
+FPSPadding.Parent = FPSScroll
 local FPSList = Instance.new("UIListLayout")
 FPSList.SortOrder = Enum.SortOrder.LayoutOrder
 FPSList.Padding = UDim.new(0, 6)
-FPSList.Parent = FPSTab
+FPSList.Parent = FPSScroll
 local BoostFPSBtn = Instance.new("TextButton")
 BoostFPSBtn.Name = "BoostFPSBtn"
 BoostFPSBtn.Size = UDim2.new(1, 0, 0, 36)
@@ -203,7 +215,7 @@ BoostFPSBtn.TextXAlignment = Enum.TextXAlignment.Left
 BoostFPSBtn.BorderSizePixel = 0
 BoostFPSBtn.LayoutOrder = 1
 BoostFPSBtn.ZIndex = 12
-BoostFPSBtn.Parent = FPSTab
+BoostFPSBtn.Parent = FPSScroll
 local UICornerBoost = Instance.new("UICorner")
 UICornerBoost.CornerRadius = UDim.new(0, 6)
 UICornerBoost.Parent = BoostFPSBtn
@@ -229,7 +241,7 @@ FPSSubtext.Font = Enum.Font.Gotham
 FPSSubtext.TextXAlignment = Enum.TextXAlignment.Left
 FPSSubtext.LayoutOrder = 2
 FPSSubtext.ZIndex = 12
-FPSSubtext.Parent = FPSTab
+FPSSubtext.Parent = FPSScroll
 local AntiLagBtn = Instance.new("TextButton")
 AntiLagBtn.Name = "AntiLagBtn"
 AntiLagBtn.Size = UDim2.new(1, 0, 0, 36)
@@ -242,7 +254,7 @@ AntiLagBtn.TextXAlignment = Enum.TextXAlignment.Left
 AntiLagBtn.BorderSizePixel = 0
 AntiLagBtn.LayoutOrder = 3
 AntiLagBtn.ZIndex = 12
-AntiLagBtn.Parent = FPSTab
+AntiLagBtn.Parent = FPSScroll
 local UICornerAntiLag = Instance.new("UICorner")
 UICornerAntiLag.CornerRadius = UDim.new(0, 6)
 UICornerAntiLag.Parent = AntiLagBtn
@@ -263,7 +275,7 @@ AntiLagSubtextFrame.Size = UDim2.new(1, 0, 0, 16)
 AntiLagSubtextFrame.BackgroundTransparency = 1
 AntiLagSubtextFrame.LayoutOrder = 4
 AntiLagSubtextFrame.ZIndex = 12
-AntiLagSubtextFrame.Parent = FPSTab
+AntiLagSubtextFrame.Parent = FPSScroll
 local WarningIcon = Instance.new("ImageLabel")
 WarningIcon.Name = "WarningIcon"
 WarningIcon.Size = UDim2.new(0, 14, 0, 14)
@@ -293,15 +305,26 @@ AutoTab.ScaleType = Enum.ScaleType.Crop
 AutoTab.Visible = false
 AutoTab.ZIndex = 11
 AutoTab.Parent = Container
+local AutoScroll = Instance.new("ScrollingFrame")
+AutoScroll.Name = "AutoScroll"
+AutoScroll.Size = UDim2.new(1, 0, 1, 0)
+AutoScroll.BackgroundTransparency = 1
+AutoScroll.BorderSizePixel = 0
+AutoScroll.ScrollBarThickness = 4
+AutoScroll.ScrollBarImageColor3 = Color3.fromRGB(255, 0, 40)
+AutoScroll.CanvasSize = UDim2.new(0, 0, 0, 0)
+AutoScroll.AutomaticCanvasSize = Enum.AutomaticSize.Y
+AutoScroll.ZIndex = 11
+AutoScroll.Parent = AutoTab
 local AutoPadding = Instance.new("UIPadding")
 AutoPadding.PaddingTop = UDim.new(0, 10)
 AutoPadding.PaddingLeft = UDim.new(0, 15)
 AutoPadding.PaddingRight = UDim.new(0, 15)
-AutoPadding.Parent = AutoTab
+AutoPadding.Parent = AutoScroll
 local AutoList = Instance.new("UIListLayout")
 AutoList.SortOrder = Enum.SortOrder.LayoutOrder
 AutoList.Padding = UDim.new(0, 2)
-AutoList.Parent = AutoTab
+AutoList.Parent = AutoScroll
 local MiscTab = Instance.new("ImageLabel")
 MiscTab.Name = "MiscTab"
 MiscTab.Size = UDim2.new(1, 0, 1, 0)
@@ -311,18 +334,58 @@ MiscTab.ScaleType = Enum.ScaleType.Crop
 MiscTab.Visible = false
 MiscTab.ZIndex = 11
 MiscTab.Parent = Container
+local MiscScroll = Instance.new("ScrollingFrame")
+MiscScroll.Name = "MiscScroll"
+MiscScroll.Size = UDim2.new(1, 0, 1, 0)
+MiscScroll.BackgroundTransparency = 1
+MiscScroll.BorderSizePixel = 0
+MiscScroll.ScrollBarThickness = 4
+MiscScroll.ScrollBarImageColor3 = Color3.fromRGB(255, 0, 40)
+MiscScroll.CanvasSize = UDim2.new(0, 0, 0, 0)
+MiscScroll.AutomaticCanvasSize = Enum.AutomaticSize.Y
+MiscScroll.ZIndex = 11
+MiscScroll.Parent = MiscTab
 local MiscPadding = Instance.new("UIPadding")
 MiscPadding.PaddingTop = UDim.new(0, 10)
 MiscPadding.PaddingLeft = UDim.new(0, 15)
 MiscPadding.PaddingRight = UDim.new(0, 15)
-MiscPadding.Parent = MiscTab
+MiscPadding.Parent = MiscScroll
 local MiscList = Instance.new("UIListLayout")
 MiscList.SortOrder = Enum.SortOrder.LayoutOrder
 MiscList.Padding = UDim.new(0, 2)
-MiscList.Parent = MiscTab
+MiscList.Parent = MiscScroll
+local AimTab = Instance.new("ImageLabel")
+AimTab.Name = "AimTab"
+AimTab.Size = UDim2.new(1, 0, 1, 0)
+AimTab.BackgroundTransparency = 1
+AimTab.Image = "rbxassetid://6521912809"
+AimTab.ScaleType = Enum.ScaleType.Crop
+AimTab.Visible = false
+AimTab.ZIndex = 11
+AimTab.Parent = Container
+local AimScroll = Instance.new("ScrollingFrame")
+AimScroll.Name = "AimScroll"
+AimScroll.Size = UDim2.new(1, 0, 1, 0)
+AimScroll.BackgroundTransparency = 1
+AimScroll.BorderSizePixel = 0
+AimScroll.ScrollBarThickness = 4
+AimScroll.ScrollBarImageColor3 = Color3.fromRGB(255, 0, 40)
+AimScroll.CanvasSize = UDim2.new(0, 0, 0, 0)
+AimScroll.AutomaticCanvasSize = Enum.AutomaticSize.Y
+AimScroll.ZIndex = 11
+AimScroll.Parent = AimTab
+local AimPadding = Instance.new("UIPadding")
+AimPadding.PaddingTop = UDim.new(0, 10)
+AimPadding.PaddingLeft = UDim.new(0, 15)
+AimPadding.PaddingRight = UDim.new(0, 15)
+AimPadding.Parent = AimScroll
+local AimList = Instance.new("UIListLayout")
+AimList.SortOrder = Enum.SortOrder.LayoutOrder
+AimList.Padding = UDim.new(0, 2)
+AimList.Parent = AimScroll
 
 local function CreateToggle(name, text, subtext, layoutOrder, parentFrame)
-parentFrame = parentFrame or AutoTab
+parentFrame = parentFrame or AutoScroll
 local Frame = Instance.new("Frame")
 Frame.Name = name .. "Frame"
 Frame.Size = UDim2.new(1, 0, 0, 42)
@@ -401,8 +464,8 @@ end
 }
 end
 
-local MuteSoundToggle = CreateToggle("MuteSound", "Mute Sound", "Mutes all in-game audio", 5, FPSTab)
-local NoRenderToggle = CreateToggle("NoRender", "No Render", "Covers screen with black texture", 6, FPSTab)
+local MuteSoundToggle = CreateToggle("MuteSound", "Mute Sound", "Mutes all in-game audio", 5, FPSScroll)
+local NoRenderToggle = CreateToggle("NoRender", "No Render", "Covers screen with black texture", 6, FPSScroll)
 local storedVolume = UserGameSettings.MasterVolume
 MuteSoundToggle.SetCallback(function(state)
 if state then
@@ -415,20 +478,20 @@ end)
 NoRenderToggle.SetCallback(function(state)
 NoRenderOverlay.Visible = state
 end)
-local AutoNearestToggle = CreateToggle("AutoNearest", "Auto Kill Nearest", "This kills the nearest player", 1)
-local AutoLowestToggle = CreateToggle("AutoLowest", "Auto Kill Lowest", "This kills a low health player", 2)
-local BypassDeathCounterToggle = CreateToggle("BypassDeathCounter", "Bypass Death Counter", "Bypasses death counter on specific animations", 1, MiscTab)
-local NoDashCooldownToggle = CreateToggle("NoDashCooldown", "No dash cooldown", "Removes dash cooldown", 2, MiscTab)
-local DodgeSaitamaToggle = CreateToggle("DodgeSaitama", "Dodge Saitama moves", "Dodges specific Saitama moves", 3, MiscTab)
-local AntiVoidToggle = CreateToggle("AntiVoid", "Anti void", "Prevents falling into the void", 4, MiscTab)
-local InvisibleToggle = CreateToggle("Invisible", "Invisible", "Makes player character invisible", 5, MiscTab)
+local AutoNearestToggle = CreateToggle("AutoNearest", "Auto Kill Nearest", "This kills the nearest player", 1, AutoScroll)
+local AutoLowestToggle = CreateToggle("AutoLowest", "Auto Kill Lowest", "This kills a low health player", 2, AutoScroll)
+local BypassDeathCounterToggle = CreateToggle("BypassDeathCounter", "Bypass Death Counter", "Bypasses death counter on specific animations", 1, MiscScroll)
+local NoDashCooldownToggle = CreateToggle("NoDashCooldown", "No dash cooldown", "Removes dash cooldown", 2, MiscScroll)
+local DodgeSaitamaToggle = CreateToggle("DodgeSaitama", "Dodge Saitama moves", "Dodges specific Saitama moves", 3, MiscScroll)
+local AntiVoidToggle = CreateToggle("AntiVoid", "Anti void", "Prevents falling into the void", 4, MiscScroll)
+local InvisibleToggle = CreateToggle("Invisible", "Invisible", "Makes player character invisible", 5, MiscScroll)
 local InvisibleSubtextFrame = Instance.new("Frame")
 InvisibleSubtextFrame.Name = "InvisibleSubtextFrame"
 InvisibleSubtextFrame.Size = UDim2.new(1, 0, 0, 16)
 InvisibleSubtextFrame.BackgroundTransparency = 1
 InvisibleSubtextFrame.LayoutOrder = 6
 InvisibleSubtextFrame.ZIndex = 12
-InvisibleSubtextFrame.Parent = MiscTab
+InvisibleSubtextFrame.Parent = MiscScroll
 local InvisibleWarningIcon = Instance.new("ImageLabel")
 InvisibleWarningIcon.Name = "InvisibleWarningIcon"
 InvisibleWarningIcon.Size = UDim2.new(0, 14, 0, 14)
@@ -449,6 +512,61 @@ InvisibleSubtext.Font = Enum.Font.Gotham
 InvisibleSubtext.TextXAlignment = Enum.TextXAlignment.Left
 InvisibleSubtext.ZIndex = 12
 InvisibleSubtext.Parent = InvisibleSubtextFrame
+local AntiRagdollToggle = CreateToggle("AntiRagdoll", "Anti Ragdoll", "Prevents ragdoll state", 7, MiscScroll)
+local AntiStunToggle = CreateToggle("AntiStun", "Anti Stun", "Prevents stun effects", 8, MiscScroll)
+local FixCameraBtn = Instance.new("TextButton")
+FixCameraBtn.Name = "FixCameraBtn"
+FixCameraBtn.Size = UDim2.new(1, 0, 0, 36)
+FixCameraBtn.BackgroundColor3 = Color3.fromRGB(35, 35, 45)
+FixCameraBtn.Text = "Fix camera"
+FixCameraBtn.TextColor3 = Color3.fromRGB(255, 255, 255)
+FixCameraBtn.TextSize = 14
+FixCameraBtn.Font = Enum.Font.GothamSemibold
+FixCameraBtn.TextXAlignment = Enum.TextXAlignment.Left
+FixCameraBtn.BorderSizePixel = 0
+FixCameraBtn.LayoutOrder = 9
+FixCameraBtn.ZIndex = 12
+FixCameraBtn.Parent = MiscScroll
+local UICornerFixCamera = Instance.new("UICorner")
+UICornerFixCamera.CornerRadius = UDim.new(0, 6)
+UICornerFixCamera.Parent = FixCameraBtn
+local FixCameraPadding = Instance.new("UIPadding")
+FixCameraPadding.PaddingLeft = UDim.new(0, 12)
+FixCameraPadding.Parent = FixCameraBtn
+local AimBotToggle = CreateToggle("AimBot", "Aim bot", "Locks camera to nearest enemy", 1, AimScroll)
+local TargetInputFrame = Instance.new("Frame")
+TargetInputFrame.Name = "TargetInputFrame"
+TargetInputFrame.Size = UDim2.new(1, 0, 0, 30)
+TargetInputFrame.BackgroundTransparency = 1
+TargetInputFrame.LayoutOrder = 2
+TargetInputFrame.ZIndex = 12
+TargetInputFrame.Parent = AimScroll
+local TargetLabel = Instance.new("TextLabel")
+TargetLabel.Size = UDim2.new(0, 100, 1, 0)
+TargetLabel.BackgroundTransparency = 1
+TargetLabel.Text = "Target"
+TargetLabel.TextColor3 = Color3.fromRGB(220, 220, 220)
+TargetLabel.TextSize = 12
+TargetLabel.Font = Enum.Font.GothamSemibold
+TargetLabel.TextXAlignment = Enum.TextXAlignment.Left
+TargetLabel.ZIndex = 13
+TargetLabel.Parent = TargetInputFrame
+local TargetTextBox = Instance.new("TextBox")
+TargetTextBox.Size = UDim2.new(0, 120, 0, 24)
+TargetTextBox.Position = UDim2.new(0, 105, 0.5, -12)
+TargetTextBox.BackgroundColor3 = Color3.fromRGB(28, 28, 35)
+TargetTextBox.BorderSizePixel = 0
+TargetTextBox.Text = ""
+TargetTextBox.PlaceholderText = "Username/Display..."
+TargetTextBox.TextColor3 = Color3.fromRGB(255, 255, 255)
+TargetTextBox.PlaceholderColor3 = Color3.fromRGB(120, 120, 120)
+TargetTextBox.TextSize = 11
+TargetTextBox.Font = Enum.Font.Gotham
+TargetTextBox.ZIndex = 13
+TargetTextBox.Parent = TargetInputFrame
+local UICornerTargetInput = Instance.new("UICorner")
+UICornerTargetInput.CornerRadius = UDim.new(0, 5)
+UICornerTargetInput.Parent = TargetTextBox
 
 local function ToggleInvisibility(state)
 local player = game.Players.LocalPlayer
@@ -652,7 +770,7 @@ InputFrame.Size = UDim2.new(1, 0, 0, 30)
 InputFrame.BackgroundTransparency = 1
 InputFrame.LayoutOrder = 3
 InputFrame.ZIndex = 12
-InputFrame.Parent = AutoTab
+InputFrame.Parent = AutoScroll
 local InputLabel = Instance.new("TextLabel")
 InputLabel.Size = UDim2.new(0, 100, 1, 0)
 InputLabel.BackgroundTransparency = 1
@@ -694,42 +812,42 @@ if TextBox.Text ~= cleaned then
 TextBox.Text = cleaned
 end
 end)
-local AutoTargetToggle = CreateToggle("AutoTarget", "Auto Kill Player", "Target a specific player by name", 4)
-local TargetInputFrame = Instance.new("Frame")
-TargetInputFrame.Name = "TargetInputFrame"
-TargetInputFrame.Size = UDim2.new(1, 0, 0, 30)
-TargetInputFrame.BackgroundTransparency = 1
-TargetInputFrame.LayoutOrder = 5
-TargetInputFrame.ZIndex = 12
-TargetInputFrame.Parent = AutoTab
-local TargetLabel = Instance.new("TextLabel")
-TargetLabel.Size = UDim2.new(0, 100, 1, 0)
-TargetLabel.BackgroundTransparency = 1
-TargetLabel.Text = "Target player:"
-TargetLabel.TextColor3 = Color3.fromRGB(220, 220, 220)
-TargetLabel.TextSize = 12
-TargetLabel.Font = Enum.Font.GothamSemibold
-TargetLabel.TextXAlignment = Enum.TextXAlignment.Left
-TargetLabel.ZIndex = 13
-TargetLabel.Parent = TargetInputFrame
-local TargetTextBox = Instance.new("TextBox")
-TargetTextBox.Size = UDim2.new(0, 120, 0, 24)
-TargetTextBox.Position = UDim2.new(0, 105, 0.5, -12)
-TargetTextBox.BackgroundColor3 = Color3.fromRGB(28, 28, 35)
-TargetTextBox.BorderSizePixel = 0
-TargetTextBox.Text = ""
-TargetTextBox.PlaceholderText = "Username/Display..."
-TargetTextBox.TextColor3 = Color3.fromRGB(255, 255, 255)
-TargetTextBox.PlaceholderColor3 = Color3.fromRGB(120, 120, 120)
-TargetTextBox.TextSize = 11
-TargetTextBox.Font = Enum.Font.Gotham
-TargetTextBox.ZIndex = 13
-TargetTextBox.Parent = TargetInputFrame
-local UICornerTargetInput = Instance.new("UICorner")
-UICornerTargetInput.CornerRadius = UDim.new(0, 5)
-UICornerTargetInput.Parent = TargetTextBox
-TargetTextBox.FocusLost:Connect(function()
-getgenv().TargetPlayerName = TargetTextBox.Text
+local AutoTargetToggle = CreateToggle("AutoTarget", "Auto Kill Player", "Target a specific player by name", 4, AutoScroll)
+local TargetInputFrameAuto = Instance.new("Frame")
+TargetInputFrameAuto.Name = "TargetInputFrame"
+TargetInputFrameAuto.Size = UDim2.new(1, 0, 0, 30)
+TargetInputFrameAuto.BackgroundTransparency = 1
+TargetInputFrameAuto.LayoutOrder = 5
+TargetInputFrameAuto.ZIndex = 12
+TargetInputFrameAuto.Parent = AutoScroll
+local TargetLabelAuto = Instance.new("TextLabel")
+TargetLabelAuto.Size = UDim2.new(0, 100, 1, 0)
+TargetLabelAuto.BackgroundTransparency = 1
+TargetLabelAuto.Text = "Target player:"
+TargetLabelAuto.TextColor3 = Color3.fromRGB(220, 220, 220)
+TargetLabelAuto.TextSize = 12
+TargetLabelAuto.Font = Enum.Font.GothamSemibold
+TargetLabelAuto.TextXAlignment = Enum.TextXAlignment.Left
+TargetLabelAuto.ZIndex = 13
+TargetLabelAuto.Parent = TargetInputFrameAuto
+local TargetTextBoxAuto = Instance.new("TextBox")
+TargetTextBoxAuto.Size = UDim2.new(0, 120, 0, 24)
+TargetTextBoxAuto.Position = UDim2.new(0, 105, 0.5, -12)
+TargetTextBoxAuto.BackgroundColor3 = Color3.fromRGB(28, 28, 35)
+TargetTextBoxAuto.BorderSizePixel = 0
+TargetTextBoxAuto.Text = ""
+TargetTextBoxAuto.PlaceholderText = "Username/Display..."
+TargetTextBoxAuto.TextColor3 = Color3.fromRGB(255, 255, 255)
+TargetTextBoxAuto.PlaceholderColor3 = Color3.fromRGB(120, 120, 120)
+TargetTextBoxAuto.TextSize = 11
+TargetTextBoxAuto.Font = Enum.Font.Gotham
+TargetTextBoxAuto.ZIndex = 13
+TargetTextBoxAuto.Parent = TargetInputFrameAuto
+local UICornerTargetInputAuto = Instance.new("UICorner")
+UICornerTargetInputAuto.CornerRadius = UDim.new(0, 5)
+UICornerTargetInputAuto.Parent = TargetTextBoxAuto
+TargetTextBoxAuto.FocusLost:Connect(function()
+getgenv().TargetPlayerName = TargetTextBoxAuto.Text
 end)
 local ModeFrame = Instance.new("Frame")
 ModeFrame.Name = "ModeFrame"
@@ -737,7 +855,7 @@ ModeFrame.Size = UDim2.new(1, 0, 0, 30)
 ModeFrame.BackgroundTransparency = 1
 ModeFrame.LayoutOrder = 6
 ModeFrame.ZIndex = 12
-ModeFrame.Parent = AutoTab
+ModeFrame.Parent = AutoScroll
 local ModeLabel = Instance.new("TextLabel")
 ModeLabel.Size = UDim2.new(0, 100, 1, 0)
 ModeLabel.BackgroundTransparency = 1
@@ -843,6 +961,20 @@ AutoTabBtn.Parent = Sidebar
 local UICornerAutoTab = Instance.new("UICorner")
 UICornerAutoTab.CornerRadius = UDim.new(0, 5)
 UICornerAutoTab.Parent = AutoTabBtn
+local AimTabBtn = Instance.new("TextButton")
+AimTabBtn.Name = "AimTabBtn"
+AimTabBtn.Size = UDim2.new(1, 0, 0, 32)
+AimTabBtn.BackgroundColor3 = Color3.fromRGB(28, 28, 35)
+AimTabBtn.Text = "Aim"
+AimTabBtn.TextColor3 = Color3.fromRGB(180, 180, 180)
+AimTabBtn.TextSize = 13
+AimTabBtn.Font = Enum.Font.GothamBold
+AimTabBtn.BorderSizePixel = 0
+AimTabBtn.ZIndex = 12
+AimTabBtn.Parent = Sidebar
+local UICornerAimTab = Instance.new("UICorner")
+UICornerAimTab.CornerRadius = UDim.new(0, 5)
+UICornerAimTab.Parent = AimTabBtn
 local MiscTabBtn = Instance.new("TextButton")
 MiscTabBtn.Name = "MiscTabBtn"
 MiscTabBtn.Size = UDim2.new(1, 0, 0, 32)
@@ -860,28 +992,49 @@ UICornerMiscTab.Parent = MiscTabBtn
 FPSTabBtn.MouseButton1Click:Connect(function()
 FPSTab.Visible = true
 AutoTab.Visible = false
+AimTab.Visible = false
 MiscTab.Visible = false
 FPSTabBtn.BackgroundColor3 = Color3.fromRGB(35, 35, 45)
 FPSTabBtn.TextColor3 = Color3.fromRGB(255, 0, 40)
 AutoTabBtn.BackgroundColor3 = Color3.fromRGB(28, 28, 35)
 AutoTabBtn.TextColor3 = Color3.fromRGB(180, 180, 180)
+AimTabBtn.BackgroundColor3 = Color3.fromRGB(28, 28, 35)
+AimTabBtn.TextColor3 = Color3.fromRGB(180, 180, 180)
 MiscTabBtn.BackgroundColor3 = Color3.fromRGB(28, 28, 35)
 MiscTabBtn.TextColor3 = Color3.fromRGB(180, 180, 180)
 end)
 AutoTabBtn.MouseButton1Click:Connect(function()
 FPSTab.Visible = false
 AutoTab.Visible = true
+AimTab.Visible = false
 MiscTab.Visible = false
 AutoTabBtn.BackgroundColor3 = Color3.fromRGB(35, 35, 45)
 AutoTabBtn.TextColor3 = Color3.fromRGB(255, 0, 40)
 FPSTabBtn.BackgroundColor3 = Color3.fromRGB(28, 28, 35)
 FPSTabBtn.TextColor3 = Color3.fromRGB(180, 180, 180)
+AimTabBtn.BackgroundColor3 = Color3.fromRGB(28, 28, 35)
+AimTabBtn.TextColor3 = Color3.fromRGB(180, 180, 180)
+MiscTabBtn.BackgroundColor3 = Color3.fromRGB(28, 28, 35)
+MiscTabBtn.TextColor3 = Color3.fromRGB(180, 180, 180)
+end)
+AimTabBtn.MouseButton1Click:Connect(function()
+FPSTab.Visible = false
+AutoTab.Visible = false
+AimTab.Visible = true
+MiscTab.Visible = false
+AimTabBtn.BackgroundColor3 = Color3.fromRGB(35, 35, 45)
+AimTabBtn.TextColor3 = Color3.fromRGB(255, 0, 40)
+FPSTabBtn.BackgroundColor3 = Color3.fromRGB(28, 28, 35)
+FPSTabBtn.TextColor3 = Color3.fromRGB(180, 180, 180)
+AutoTabBtn.BackgroundColor3 = Color3.fromRGB(28, 28, 35)
+AutoTabBtn.TextColor3 = Color3.fromRGB(180, 180, 180)
 MiscTabBtn.BackgroundColor3 = Color3.fromRGB(28, 28, 35)
 MiscTabBtn.TextColor3 = Color3.fromRGB(180, 180, 180)
 end)
 MiscTabBtn.MouseButton1Click:Connect(function()
 FPSTab.Visible = false
 AutoTab.Visible = false
+AimTab.Visible = false
 MiscTab.Visible = true
 MiscTabBtn.BackgroundColor3 = Color3.fromRGB(35, 35, 45)
 MiscTabBtn.TextColor3 = Color3.fromRGB(255, 0, 40)
@@ -889,6 +1042,8 @@ FPSTabBtn.BackgroundColor3 = Color3.fromRGB(28, 28, 35)
 FPSTabBtn.TextColor3 = Color3.fromRGB(180, 180, 180)
 AutoTabBtn.BackgroundColor3 = Color3.fromRGB(28, 28, 35)
 AutoTabBtn.TextColor3 = Color3.fromRGB(180, 180, 180)
+AimTabBtn.BackgroundColor3 = Color3.fromRGB(28, 28, 35)
+AimTabBtn.TextColor3 = Color3.fromRGB(180, 180, 180)
 end)
 BoostFPSBtn.MouseButton1Click:Connect(function()
 loadstring(game:HttpGet("https://raw.githubusercontent.com/stormzdev/the-strongest-battlegrounds/refs/heads/main/fps-boost.lua"))()
@@ -1489,7 +1644,7 @@ end
 end)
 AutoTargetToggle.SetCallback(function(state)
 getgenv().AutoKillTargetPlr = state
-getgenv().TargetPlayerName = TargetTextBox.Text
+getgenv().TargetPlayerName = TargetTextBoxAuto.Text
 if state then
 StartAutoKillTarget()
 end
@@ -1502,4 +1657,225 @@ else
 TextBox.Text = "35"
 getgenv().LowestHealthThreshold = 35
 end
+end)
+
+local CamlockState = false
+local Prediction = 0.16
+local Locked = true
+getgenv().Key = "c"
+
+local function FindNearestEnemy()
+local ClosestDistance, ClosestPlayer = math.huge, nil
+local CenterPosition = Vector2.new(
+game:GetService("GuiService"):GetScreenResolution().X / 2,
+game:GetService("GuiService"):GetScreenResolution().Y / 2
+)
+for _, Player in ipairs(Players:GetPlayers()) do
+if Player ~= LocalPlayer then
+local Character = Player.Character
+if Character and Character:FindFirstChild("HumanoidRootPart") and Character:FindFirstChildOfClass("Humanoid") and Character.Humanoid.Health > 0 then
+local Position, IsVisibleOnViewport =
+workspace.CurrentCamera:WorldToViewportPoint(Character.HumanoidRootPart.Position)
+if IsVisibleOnViewport then
+local Distance = (CenterPosition - Vector2.new(Position.X, Position.Y)).Magnitude
+if Distance < ClosestDistance then
+ClosestPlayer = Character.HumanoidRootPart
+ClosestDistance = Distance
+end
+end
+end
+end
+end
+return ClosestPlayer
+end
+
+local enemy = nil
+
+RunService.Heartbeat:Connect(function()
+if CamlockState == true then
+if enemy then
+local camera = workspace.CurrentCamera
+camera.CFrame = CFrame.new(camera.CFrame.p, enemy.Position + enemy.Velocity * Prediction)
+end
+end
+end)
+
+local Mouse = LocalPlayer:GetMouse()
+Mouse.KeyDown:Connect(function(k)
+if k == getgenv().Key then
+Locked = not Locked
+if Locked then
+enemy = FindNearestEnemy()
+CamlockState = true
+else
+if enemy ~= nil then
+enemy = nil
+CamlockState = false
+end
+end
+end
+end)
+
+local function SetAimBot(state)
+if state then
+CamlockState = true
+enemy = FindNearestEnemy()
+else
+CamlockState = false
+enemy = nil
+end
+end
+
+AimBotToggle.SetCallback(function(state)
+SetAimBot(state)
+end)
+
+local AntiRagdollEnabled = false
+local AntiStunEnabled = false
+local connections = {}
+
+local function cleanup()
+for _, conn in pairs(connections) do
+if typeof(conn) == "RBXScriptConnection" then
+conn:Disconnect()
+end
+end
+table.clear(connections)
+end
+
+local function applyAntiRagdoll(character)
+if not character then return end
+
+local humanoid = character:FindFirstChildOfClass("Humanoid")
+if not humanoid then return end
+
+local conn1 = RunService.Heartbeat:Connect(function()
+if not AntiRagdollEnabled then return end
+if humanoid:GetState() == Enum.HumanoidStateType.Physics or
+humanoid:GetState() == Enum.HumanoidStateType.Ragdoll or
+humanoid:GetState() == Enum.HumanoidStateType.FallingDown then
+humanoid:ChangeState(Enum.HumanoidStateType.GettingUp)
+humanoid:ChangeState(Enum.HumanoidStateType.Running)
+end
+end)
+table.insert(connections, conn1)
+
+local conn2 = character.DescendantAdded:Connect(function(desc)
+if not AntiRagdollEnabled then return end
+if desc:IsA("BallSocketConstraint") or desc:IsA("HingeConstraint") or desc.Name:lower():find("ragdoll") then
+task.defer(function()
+if desc and desc.Parent then
+desc:Destroy()
+end
+end)
+end
+end)
+table.insert(connections, conn2)
+end
+
+local function applyAntiStun(character)
+if not character then return end
+
+local humanoid = character:FindFirstChildOfClass("Humanoid")
+if not humanoid then return end
+
+local conn = RunService.Heartbeat:Connect(function()
+if not AntiStunEnabled then return end
+
+if humanoid:GetAttribute("Stunned") then
+humanoid:SetAttribute("Stunned", false)
+end
+if humanoid:GetAttribute("Stun") then
+humanoid:SetAttribute("Stun", false)
+end
+if character:GetAttribute("Stunned") then
+character:SetAttribute("Stunned", false)
+end
+
+if humanoid.WalkSpeed < 8 then
+humanoid.WalkSpeed = 16
+end
+if humanoid.JumpPower < 40 then
+humanoid.JumpPower = 50
+end
+end)
+table.insert(connections, conn)
+end
+
+local function onCharacterAdded(character)
+task.wait(0.4)
+if AntiRagdollEnabled then
+applyAntiRagdoll(character)
+end
+if AntiStunEnabled then
+applyAntiStun(character)
+end
+end
+
+function SetAntiRagdoll(state)
+AntiRagdollEnabled = state
+cleanup()
+
+local char = LocalPlayer.Character
+if state and char then
+applyAntiRagdoll(char)
+if AntiStunEnabled then
+applyAntiStun(char)
+end
+elseif AntiStunEnabled and char then
+applyAntiStun(char)
+end
+end
+
+function SetAntiStun(state)
+AntiStunEnabled = state
+cleanup()
+
+local char = LocalPlayer.Character
+if state and char then
+applyAntiStun(char)
+if AntiRagdollEnabled then
+applyAntiRagdoll(char)
+end
+elseif AntiRagdollEnabled and char then
+applyAntiRagdoll(char)
+end
+end
+
+LocalPlayer.CharacterAdded:Connect(onCharacterAdded)
+
+if LocalPlayer.Character then
+onCharacterAdded(LocalPlayer.Character)
+end
+
+AntiRagdollToggle.SetCallback(function(state)
+SetAntiRagdoll(state)
+end)
+AntiStunToggle.SetCallback(function(state)
+SetAntiStun(state)
+end)
+
+local function FixCamera()
+local character = LocalPlayer.Character
+if not character then return end
+
+local humanoid = character:FindFirstChildOfClass("Humanoid")
+if not humanoid then return end
+
+local Camera = workspace.CurrentCamera
+Camera.CameraType = Enum.CameraType.Custom
+Camera.CameraSubject = humanoid
+
+LocalPlayer.CameraMode = Enum.CameraMode.Classic
+LocalPlayer.CameraMaxZoomDistance = 128
+LocalPlayer.CameraMinZoomDistance = 0.5
+
+local hrp = character:FindFirstChild("HumanoidRootPart")
+if hrp then
+Camera.CFrame = CFrame.new(hrp.Position + Vector3.new(0, 5, 10), hrp.Position)
+end
+end
+
+FixCameraBtn.MouseButton1Click:Connect(function()
+FixCamera()
 end)
