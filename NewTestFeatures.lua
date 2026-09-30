@@ -384,6 +384,36 @@ AimList.SortOrder = Enum.SortOrder.LayoutOrder
 AimList.Padding = UDim.new(0, 2)
 AimList.Parent = AimScroll
 
+local RankedTab = Instance.new("ImageLabel")
+RankedTab.Name = "RankedTab"
+RankedTab.Size = UDim2.new(1, 0, 1, 0)
+RankedTab.BackgroundTransparency = 1
+RankedTab.Image = "rbxassetid://6521912809"
+RankedTab.ScaleType = Enum.ScaleType.Crop
+RankedTab.Visible = false
+RankedTab.ZIndex = 11
+RankedTab.Parent = Container
+local RankedScroll = Instance.new("ScrollingFrame")
+RankedScroll.Name = "RankedScroll"
+RankedScroll.Size = UDim2.new(1, 0, 1, 0)
+RankedScroll.BackgroundTransparency = 1
+RankedScroll.BorderSizePixel = 0
+RankedScroll.ScrollBarThickness = 4
+RankedScroll.ScrollBarImageColor3 = Color3.fromRGB(255, 0, 40)
+RankedScroll.CanvasSize = UDim2.new(0, 0, 0, 0)
+RankedScroll.AutomaticCanvasSize = Enum.AutomaticSize.Y
+RankedScroll.ZIndex = 11
+RankedScroll.Parent = RankedTab
+local RankedPadding = Instance.new("UIPadding")
+RankedPadding.PaddingTop = UDim.new(0, 10)
+RankedPadding.PaddingLeft = UDim.new(0, 15)
+RankedPadding.PaddingRight = UDim.new(0, 15)
+RankedPadding.Parent = RankedScroll
+local RankedList = Instance.new("UIListLayout")
+RankedList.SortOrder = Enum.SortOrder.LayoutOrder
+RankedList.Padding = UDim.new(0, 2)
+RankedList.Parent = RankedScroll
+
 local function CreateToggle(name, text, subtext, layoutOrder, parentFrame)
 parentFrame = parentFrame or AutoScroll
 local Frame = Instance.new("Frame")
@@ -534,6 +564,7 @@ local FixCameraPadding = Instance.new("UIPadding")
 FixCameraPadding.PaddingLeft = UDim.new(0, 12)
 FixCameraPadding.Parent = FixCameraBtn
 local AimBotToggle = CreateToggle("AimBot", "Aim bot", "Locks camera to nearest enemy", 1, AimScroll)
+local RankedFarmToggle = CreateToggle("RankedFarm", "Ranked farm", "Farms ranked matches automatically", 1, RankedScroll)
 local TargetInputFrame = Instance.new("Frame")
 TargetInputFrame.Name = "TargetInputFrame"
 TargetInputFrame.Size = UDim2.new(1, 0, 0, 30)
@@ -882,15 +913,19 @@ local UICornerMode = Instance.new("UICorner")
 UICornerMode.CornerRadius = UDim.new(0, 5)
 UICornerMode.Parent = ModeDropdownBtn
 
-local ModeMenu = Instance.new("Frame")
+local ModeMenu = Instance.new("ScrollingFrame")
 ModeMenu.Name = "ModeMenu"
 ModeMenu.Size = UDim2.new(0, 120, 0, 0)
 ModeMenu.BackgroundColor3 = Color3.fromRGB(25, 25, 32)
 ModeMenu.BorderSizePixel = 0
 ModeMenu.Visible = false
 ModeMenu.ClipsDescendants = true
+ModeMenu.ScrollBarThickness = 3
+ModeMenu.ScrollBarImageColor3 = Color3.fromRGB(255, 0, 40)
+ModeMenu.CanvasSize = UDim2.new(0, 0, 0, 0)
+ModeMenu.AutomaticCanvasSize = Enum.AutomaticSize.Y
 ModeMenu.ZIndex = 100
-ModeMenu.Parent = MainFrame
+ModeMenu.Parent = ScreenGui
 local UICornerMenu = Instance.new("UICorner")
 UICornerMenu.CornerRadius = UDim.new(0, 5)
 UICornerMenu.Parent = ModeMenu
@@ -937,12 +972,8 @@ local function ToggleModeMenu()
 
 	local absPos = ModeDropdownBtn.AbsolutePosition
 	local absSize = ModeDropdownBtn.AbsoluteSize
-	local mainAbsPos = MainFrame.AbsolutePosition
 
-	local targetX = absPos.X - mainAbsPos.X
-	local targetY = absPos.Y - mainAbsPos.Y + absSize.Y + 2
-
-	ModeMenu.Position = UDim2.new(0, targetX, 0, targetY)
+	ModeMenu.Position = UDim2.new(0, absPos.X, 0, absPos.Y + absSize.Y + 2)
 
 	if ModeMenuOpen then
 		ModeMenuOpen = false
@@ -960,7 +991,7 @@ local function ToggleModeMenu()
 		ModeMenu.Visible = true
 		ModeMenu.Size = UDim2.new(0, 120, 0, 0)
 		ModeMenuTween = TweenService:Create(ModeMenu, TweenInfo.new(0.22, Enum.EasingStyle.Quad, Enum.EasingDirection.Out), {
-			Size = UDim2.new(0, 120, 0, 54)
+			Size = UDim2.new(0, 120, 0, 56)
 		})
 		ModeMenuTween:Play()
 	end
@@ -1045,6 +1076,20 @@ AimTabBtn.Parent = Sidebar
 local UICornerAimTab = Instance.new("UICorner")
 UICornerAimTab.CornerRadius = UDim.new(0, 5)
 UICornerAimTab.Parent = AimTabBtn
+local RankedTabBtn = Instance.new("TextButton")
+RankedTabBtn.Name = "RankedTabBtn"
+RankedTabBtn.Size = UDim2.new(1, 0, 0, 32)
+RankedTabBtn.BackgroundColor3 = Color3.fromRGB(28, 28, 35)
+RankedTabBtn.Text = "Ranked"
+RankedTabBtn.TextColor3 = Color3.fromRGB(180, 180, 180)
+RankedTabBtn.TextSize = 13
+RankedTabBtn.Font = Enum.Font.GothamBold
+RankedTabBtn.BorderSizePixel = 0
+RankedTabBtn.ZIndex = 12
+RankedTabBtn.Parent = Sidebar
+local UICornerRankedTab = Instance.new("UICorner")
+UICornerRankedTab.CornerRadius = UDim.new(0, 5)
+UICornerRankedTab.Parent = RankedTabBtn
 local MiscTabBtn = Instance.new("TextButton")
 MiscTabBtn.Name = "MiscTabBtn"
 MiscTabBtn.Size = UDim2.new(1, 0, 0, 32)
@@ -1064,6 +1109,7 @@ if ModeMenuOpen then ToggleModeMenu() end
 FPSTab.Visible = true
 AutoTab.Visible = false
 AimTab.Visible = false
+RankedTab.Visible = false
 MiscTab.Visible = false
 FPSTabBtn.BackgroundColor3 = Color3.fromRGB(35, 35, 45)
 FPSTabBtn.TextColor3 = Color3.fromRGB(255, 0, 40)
@@ -1071,6 +1117,8 @@ AutoTabBtn.BackgroundColor3 = Color3.fromRGB(28, 28, 35)
 AutoTabBtn.TextColor3 = Color3.fromRGB(180, 180, 180)
 AimTabBtn.BackgroundColor3 = Color3.fromRGB(28, 28, 35)
 AimTabBtn.TextColor3 = Color3.fromRGB(180, 180, 180)
+RankedTabBtn.BackgroundColor3 = Color3.fromRGB(28, 28, 35)
+RankedTabBtn.TextColor3 = Color3.fromRGB(180, 180, 180)
 MiscTabBtn.BackgroundColor3 = Color3.fromRGB(28, 28, 35)
 MiscTabBtn.TextColor3 = Color3.fromRGB(180, 180, 180)
 end)
@@ -1079,6 +1127,7 @@ if ModeMenuOpen then ToggleModeMenu() end
 FPSTab.Visible = false
 AutoTab.Visible = true
 AimTab.Visible = false
+RankedTab.Visible = false
 MiscTab.Visible = false
 AutoTabBtn.BackgroundColor3 = Color3.fromRGB(35, 35, 45)
 AutoTabBtn.TextColor3 = Color3.fromRGB(255, 0, 40)
@@ -1086,6 +1135,8 @@ FPSTabBtn.BackgroundColor3 = Color3.fromRGB(28, 28, 35)
 FPSTabBtn.TextColor3 = Color3.fromRGB(180, 180, 180)
 AimTabBtn.BackgroundColor3 = Color3.fromRGB(28, 28, 35)
 AimTabBtn.TextColor3 = Color3.fromRGB(180, 180, 180)
+RankedTabBtn.BackgroundColor3 = Color3.fromRGB(28, 28, 35)
+RankedTabBtn.TextColor3 = Color3.fromRGB(180, 180, 180)
 MiscTabBtn.BackgroundColor3 = Color3.fromRGB(28, 28, 35)
 MiscTabBtn.TextColor3 = Color3.fromRGB(180, 180, 180)
 end)
@@ -1094,6 +1145,7 @@ if ModeMenuOpen then ToggleModeMenu() end
 FPSTab.Visible = false
 AutoTab.Visible = false
 AimTab.Visible = true
+RankedTab.Visible = false
 MiscTab.Visible = false
 AimTabBtn.BackgroundColor3 = Color3.fromRGB(35, 35, 45)
 AimTabBtn.TextColor3 = Color3.fromRGB(255, 0, 40)
@@ -1101,6 +1153,26 @@ FPSTabBtn.BackgroundColor3 = Color3.fromRGB(28, 28, 35)
 FPSTabBtn.TextColor3 = Color3.fromRGB(180, 180, 180)
 AutoTabBtn.BackgroundColor3 = Color3.fromRGB(28, 28, 35)
 AutoTabBtn.TextColor3 = Color3.fromRGB(180, 180, 180)
+RankedTabBtn.BackgroundColor3 = Color3.fromRGB(28, 28, 35)
+RankedTabBtn.TextColor3 = Color3.fromRGB(180, 180, 180)
+MiscTabBtn.BackgroundColor3 = Color3.fromRGB(28, 28, 35)
+MiscTabBtn.TextColor3 = Color3.fromRGB(180, 180, 180)
+end)
+RankedTabBtn.MouseButton1Click:Connect(function()
+if ModeMenuOpen then ToggleModeMenu() end
+FPSTab.Visible = false
+AutoTab.Visible = false
+AimTab.Visible = false
+RankedTab.Visible = true
+MiscTab.Visible = false
+RankedTabBtn.BackgroundColor3 = Color3.fromRGB(35, 35, 45)
+RankedTabBtn.TextColor3 = Color3.fromRGB(255, 0, 40)
+FPSTabBtn.BackgroundColor3 = Color3.fromRGB(28, 28, 35)
+FPSTabBtn.TextColor3 = Color3.fromRGB(180, 180, 180)
+AutoTabBtn.BackgroundColor3 = Color3.fromRGB(28, 28, 35)
+AutoTabBtn.TextColor3 = Color3.fromRGB(180, 180, 180)
+AimTabBtn.BackgroundColor3 = Color3.fromRGB(28, 28, 35)
+AimTabBtn.TextColor3 = Color3.fromRGB(180, 180, 180)
 MiscTabBtn.BackgroundColor3 = Color3.fromRGB(28, 28, 35)
 MiscTabBtn.TextColor3 = Color3.fromRGB(180, 180, 180)
 end)
@@ -1109,6 +1181,7 @@ if ModeMenuOpen then ToggleModeMenu() end
 FPSTab.Visible = false
 AutoTab.Visible = false
 AimTab.Visible = false
+RankedTab.Visible = false
 MiscTab.Visible = true
 MiscTabBtn.BackgroundColor3 = Color3.fromRGB(35, 35, 45)
 MiscTabBtn.TextColor3 = Color3.fromRGB(255, 0, 40)
@@ -1118,6 +1191,8 @@ AutoTabBtn.BackgroundColor3 = Color3.fromRGB(28, 28, 35)
 AutoTabBtn.TextColor3 = Color3.fromRGB(180, 180, 180)
 AimTabBtn.BackgroundColor3 = Color3.fromRGB(28, 28, 35)
 AimTabBtn.TextColor3 = Color3.fromRGB(180, 180, 180)
+RankedTabBtn.BackgroundColor3 = Color3.fromRGB(28, 28, 35)
+RankedTabBtn.TextColor3 = Color3.fromRGB(180, 180, 180)
 end)
 BoostFPSBtn.MouseButton1Click:Connect(function()
 loadstring(game:HttpGet("https://raw.githubusercontent.com/stormzdev/the-strongest-battlegrounds/refs/heads/main/fps-boost.lua"))()
@@ -1730,6 +1805,90 @@ getgenv().LowestHealthThreshold = val
 else
 TextBox.Text = "35"
 getgenv().LowestHealthThreshold = 35
+end
+end)
+
+getgenv().RankedFarmEnabled = false
+
+local function isEnemy(player, character)
+if not player or not character then return false end
+local playerCount = #Players:GetPlayers()
+if playerCount == 2 then
+return true
+end
+if character:FindFirstChild("TeammateHighlight") or character:FindFirstChild("AllyHighlight") or (character:FindFirstChildWhichIsA("Highlight") and character:FindFirstChildWhichIsA("Highlight").FillColor == Color3.fromRGB(0, 255, 0)) then
+return false
+end
+if player:GetAttribute("Team") == LocalPlayer:GetAttribute("Team") and player:GetAttribute("Team") ~= nil then
+return false
+end
+if character:GetAttribute("IsTeammate") == true or character:GetAttribute("Ally") == true then
+return false
+end
+return true
+end
+
+local function StartRankedFarm()
+local LPlayer = game.Players.LocalPlayer
+local CRoot
+local function UpdateCRoot()
+local LChar = LPlayer.Character
+if LChar then
+CRoot = LChar:FindFirstChild("HumanoidRootPart")
+if not CRoot then
+LChar.ChildAdded:Wait()
+CRoot = LChar:WaitForChild("HumanoidRootPart")
+end
+end
+end
+local function FindRankedTarget()
+local Dist = math.huge
+local NearestPlr = nil
+for _, v in pairs(game.Workspace.Live:GetChildren()) do
+local plr = game.Players:GetPlayerFromCharacter(v)
+if plr and v ~= LPlayer.Character then
+local Humanoid = v:FindFirstChildOfClass("Humanoid")
+local HumanoidRoot = v:FindFirstChild("HumanoidRootPart")
+if Humanoid and HumanoidRoot and Humanoid.Health > 0 then
+if isEnemy(plr, v) then
+local Mag = (CRoot.Position - HumanoidRoot.Position).Magnitude
+if Mag < Dist then
+Dist = Mag
+NearestPlr = HumanoidRoot
+end
+end
+end
+end
+end
+return NearestPlr
+end
+task.spawn(function()
+while getgenv().RankedFarmEnabled do
+if not IsDodging then
+pcall(function()
+UpdateCRoot()
+if CRoot then
+local Found = FindRankedTarget()
+if Found then
+LPlayer.Character:SetPrimaryPartCFrame(CFrame.new(Found.Position - Vector3.new(0, Found.Size.Y/2, 0) - Found.CFrame.LookVector * getgenv().TeleportDistance + Vector3.new(0, -6, 0), Found.Position - Vector3.new(0, Found.Size.Y/2, 0)))
+PerformAttack(Found)
+end
+end
+end)
+end
+task.wait(0.015)
+end
+end)
+LPlayer.CharacterAdded:Connect(function()
+task.wait(1.5)
+UpdateCRoot()
+end)
+end
+
+RankedFarmToggle.SetCallback(function(state)
+getgenv().RankedFarmEnabled = state
+if state then
+StartRankedFarm()
 end
 end)
 
