@@ -1,15 +1,12 @@
 local Players = game:GetService("Players")
 local TweenService = game:GetService("TweenService")
-local RunService = game:GetService("RunService")
 
 local LocalPlayer = Players.LocalPlayer
 local PlayerGui = LocalPlayer:WaitForChild("PlayerGui")
 
-
 if game.PlaceId \~= 10449761463 then
     return
 end
-
 
 local MAIN_SCRIPT_URL = "loadstring(game:HttpGet("https://raw.githubusercontent.com/H4T0-debug/MiHub/refs/heads/main/Main.lua"))() "
 
@@ -27,6 +24,33 @@ local function _RandomString(length)
         result = result .. string.char(math.random(97, 122))
     end
     return result
+end
+
+local function HttpGet(url)
+    local success, result = pcall(function()
+        if game and game.HttpGet then
+            return game:HttpGet(url)
+        elseif http_request then
+            local response = http_request({Url = url, Method = "GET"})
+            return response.Body
+        elseif syn and syn.request then
+            local response = syn.request({Url = url, Method = "GET"})
+            return response.Body
+        elseif request then
+            local response = request({Url = url, Method = "GET"})
+            return response.Body
+        elseif http and http.request then
+            local response = http.request({Url = url, Method = "GET"})
+            return response.Body
+        else
+            error("No working HttpGet method found")
+        end
+    end)
+
+    if success and result and #result > 0 then
+        return result
+    end
+    return nil
 end
 
 local function CreateLoader()
@@ -124,7 +148,9 @@ local function FadeOut(gui)
         end
     end
     task.delay(0.5, function()
-        gui:Destroy()
+        if gui and gui.Parent then
+            gui:Destroy()
+        end
     end)
 end
 
@@ -134,28 +160,42 @@ local function StartLoader()
     task.spawn(function()
         ui.Title.Text = "Initializing..."
         ui.Status.Text = "Checking environment"
-        AnimateProgress(ui.BarFill, 0.25, 0.8)
-        task.wait(1)
+        AnimateProgress(ui.BarFill, 0.25, 0.7)
+        task.wait(0.9)
 
         ui.Title.Text = "Loading modules..."
         ui.Status.Text = "Fetching script"
-        AnimateProgress(ui.BarFill, 0.65, 1)
-        task.wait(1.2)
+        AnimateProgress(ui.BarFill, 0.6, 0.9)
+        task.wait(1)
+
+        -- Fetch the script
+        local source = HttpGet(MAIN_SCRIPT_URL)
+
+        if not source then
+            ui.Title.Text = "Failed to load"
+            ui.Status.Text = "HttpGet returned nil"
+            ui.Title.TextColor3 = Color3.fromRGB(255, 80, 80)
+            return
+        end
 
         ui.Title.Text = "Almost ready..."
-        ui.Status.Text = "Finalizing"
-        AnimateProgress(ui.BarFill, 1, 0.7)
-        task.wait(0.9)
+        ui.Status.Text = "Executing"
+        AnimateProgress(ui.BarFill, 1, 0.5)
+        task.wait(0.6)
+
+        local func, err = loadstring(source)
+        if not func then
+            ui.Title.Text = "Loadstring failed"
+            ui.Status.Text = tostring(err)
+            ui.Title.TextColor3 = Color3.fromRGB(255, 80, 80)
+            return
+        end
 
         FadeOut(ui.ScreenGui)
 
-        
-        local success, err = pcall(function()
-            loadstring(game:HttpGet(MAIN_SCRIPT_URL))()
-        end)
-
+        local success, runErr = pcall(func)
         if not success then
-            warn("[Loader] Failed to load main script:", err)
+            warn("[Loader] Script error:", runErr)
         end
     end)
 end
