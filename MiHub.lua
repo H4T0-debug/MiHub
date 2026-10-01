@@ -9,7 +9,19 @@ local ScreenGui = Instance.new("ScreenGui")
 ScreenGui.Name = "MiHubGui"
 ScreenGui.ResetOnSpawn = false
 ScreenGui.ZIndexBehavior = Enum.ZIndexBehavior.Sibling
-ScreenGui.Parent = CoreGui
+pcall(function()
+	if gethui then
+		ScreenGui.Parent = gethui()
+	elseif syn and syn.protect_gui then
+		syn.protect_gui(ScreenGui)
+		ScreenGui.Parent = CoreGui
+	else
+		ScreenGui.Parent = CoreGui
+	end
+end)
+if not ScreenGui.Parent then
+	ScreenGui.Parent = CoreGui
+end
 local NoRenderOverlay = Instance.new("ImageLabel")
 NoRenderOverlay.Name = "NoRenderOverlay"
 NoRenderOverlay.Size = UDim2.new(1, 0, 1, 0)
@@ -2210,11 +2222,15 @@ end
 
 local function clickButton(button)
 	if not button then return end
-	for _, connection in pairs(getconnections(button.MouseButton1Click)) do
-		pcall(function()
-			connection:Fire()
-		end)
-	end
+	pcall(function()
+		if getconnections then
+			for _, connection in pairs(getconnections(button.MouseButton1Click)) do
+				pcall(function()
+					connection:Fire()
+				end)
+			end
+		end
+	end)
 	pcall(function()
 		local pos = button.AbsolutePosition + (button.AbsoluteSize / 2)
 		VirtualInputManager:SendMouseButtonEvent(pos.X, pos.Y, 0, true, game, 1)
@@ -2236,12 +2252,8 @@ local function SetAutoQueue(state, mode)
 	if mode then
 		getgenv().SelectedQueueMode = mode
 	end
-	if QueueConnection then
-		task.cancel(QueueConnection)
-		QueueConnection = nil
-	end
 	if state then
-		QueueConnection = task.spawn(function()
+		task.spawn(function()
 			while AutoQueueEnabled do
 				tryQueue()
 				task.wait(3)
@@ -2478,9 +2490,8 @@ if not humanoid then return end
 
 local conn1 = RunService.Heartbeat:Connect(function()
 if not AntiRagdollEnabled then return end
-if humanoid:GetState() == Enum.HumanoidStateType.Physics or
-humanoid:GetState() == Enum.HumanoidStateType.Ragdoll or
-humanoid:GetState() == Enum.HumanoidStateType.FallingDown then
+local state = humanoid:GetState()
+if state == Enum.HumanoidStateType.Physics or state == Enum.HumanoidStateType.Ragdoll or state == Enum.HumanoidStateType.FallingDown then
 humanoid:ChangeState(Enum.HumanoidStateType.GettingUp)
 humanoid:ChangeState(Enum.HumanoidStateType.Running)
 end
