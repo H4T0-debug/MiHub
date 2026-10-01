@@ -1,10 +1,7 @@
 local Players = game:GetService("Players")
 local UserInputService = game:GetService("UserInputService")
 local TweenService = game:GetService("TweenService")
-local UserGameSettings = nil
-pcall(function()
-	UserGameSettings = UserSettings():GetService("UserGameSettings")
-end)
+local UserGameSettings = UserSettings():GetService("UserGameSettings")
 local RunService = game:GetService("RunService")
 local CoreGui = game:GetService("CoreGui")
 local LocalPlayer = Players.LocalPlayer
@@ -447,6 +444,9 @@ ThemesList.SortOrder = Enum.SortOrder.LayoutOrder
 ThemesList.Padding = UDim.new(0, 2)
 ThemesList.Parent = ThemesScroll
 
+-- ============================================================
+-- UPDATED CreateToggle: adds SetState() for programmatic toggling
+-- ============================================================
 local function CreateToggle(name, text, subtext, layoutOrder, parentFrame)
 parentFrame = parentFrame or AutoScroll
 local Frame = Instance.new("Frame")
@@ -501,46 +501,56 @@ Sub.Font = Enum.Font.Gotham
 Sub.TextXAlignment = Enum.TextXAlignment.Left
 Sub.ZIndex = 13
 Sub.Parent = Frame
+
 local toggled = false
 local callback = nil
-Btn.MouseButton1Click:Connect(function()
-toggled = not toggled
+
+local function applyVisual(state)
 local tweenInfo = TweenInfo.new(0.25, Enum.EasingStyle.Quart, Enum.EasingDirection.Out)
-if toggled then
+if state then
 TweenService:Create(ToggleBox, tweenInfo, {BackgroundColor3 = Color3.fromRGB(255, 0, 40)}):Play()
 TweenService:Create(Indicator, tweenInfo, {Position = UDim2.new(1, -17, 0.5, -7)}):Play()
 else
 TweenService:Create(ToggleBox, tweenInfo, {BackgroundColor3 = Color3.fromRGB(40, 40, 50)}):Play()
 TweenService:Create(Indicator, tweenInfo, {Position = UDim2.new(0, 3, 0.5, -7)}):Play()
 end
+end
+
+Btn.MouseButton1Click:Connect(function()
+toggled = not toggled
+applyVisual(toggled)
 if callback then
 callback(toggled)
 end
 end)
+
 return {
 SetCallback = function(fn)
 callback = fn
 end,
 GetState = function()
 return toggled
+end,
+SetState = function(state, fireCallback)
+if toggled == state then return end
+toggled = state
+applyVisual(toggled)
+if fireCallback ~= false and callback then
+callback(toggled)
+end
 end
 }
 end
 
 local MuteSoundToggle = CreateToggle("MuteSound", "Mute Sound", "Mutes all in-game audio", 5, FPSScroll)
 local NoRenderToggle = CreateToggle("NoRender", "No Render", "Covers screen with black texture", 6, FPSScroll)
-local storedVolume = 1
-if UserGameSettings then
-	storedVolume = UserGameSettings.MasterVolume
-end
+local storedVolume = UserGameSettings.MasterVolume
 MuteSoundToggle.SetCallback(function(state)
-if UserGameSettings then
 if state then
 storedVolume = UserGameSettings.MasterVolume
 UserGameSettings.MasterVolume = 0
 else
 UserGameSettings.MasterVolume = storedVolume or 1
-end
 end
 end)
 NoRenderToggle.SetCallback(function(state)
@@ -602,144 +612,154 @@ local FixCameraPadding = Instance.new("UIPadding")
 FixCameraPadding.PaddingLeft = UDim.new(0, 12)
 FixCameraPadding.Parent = FixCameraBtn
 local AimBotToggle = CreateToggle("AimBot", "Aim bot", "Locks camera to nearest enemy", 1, AimScroll)
+
+-- ============================================================
+-- RANKED TAB: Ranked Farm + Auto Queue + Mode dropdown + Auto Ult
+-- ============================================================
 local RankedFarmToggle = CreateToggle("RankedFarm", "Ranked farm", "Farms ranked matches automatically", 1, RankedScroll)
+local AutoQueueToggle = CreateToggle("AutoQueue", "Auto queue", "Automatically queues the selected mode", 2, RankedScroll)
 
-local QueueModeFrame = Instance.new("Frame")
-QueueModeFrame.Name = "QueueModeFrame"
-QueueModeFrame.Size = UDim2.new(1, 0, 0, 30)
-QueueModeFrame.BackgroundTransparency = 1
-QueueModeFrame.LayoutOrder = 2
-QueueModeFrame.ZIndex = 12
-QueueModeFrame.Parent = RankedScroll
-local QueueModeLabel = Instance.new("TextLabel")
-QueueModeLabel.Size = UDim2.new(0, 100, 1, 0)
-QueueModeLabel.BackgroundTransparency = 1
-QueueModeLabel.Text = "Queue mode:"
-QueueModeLabel.TextColor3 = Color3.fromRGB(220, 220, 220)
-QueueModeLabel.TextSize = 12
-QueueModeLabel.Font = Enum.Font.GothamSemibold
-QueueModeLabel.TextXAlignment = Enum.TextXAlignment.Left
-QueueModeLabel.ZIndex = 13
-QueueModeLabel.Parent = QueueModeFrame
-local QueueModeDropdownBtn = Instance.new("TextButton")
-QueueModeDropdownBtn.Name = "QueueModeDropdownBtn"
-QueueModeDropdownBtn.Size = UDim2.new(0, 120, 0, 24)
-QueueModeDropdownBtn.Position = UDim2.new(0, 105, 0.5, -12)
-QueueModeDropdownBtn.BackgroundColor3 = Color3.fromRGB(28, 28, 35)
-QueueModeDropdownBtn.BorderSizePixel = 0
-QueueModeDropdownBtn.Text = "1v1 v"
-QueueModeDropdownBtn.TextColor3 = Color3.fromRGB(255, 255, 255)
-QueueModeDropdownBtn.TextSize = 12
-QueueModeDropdownBtn.Font = Enum.Font.Gotham
-QueueModeDropdownBtn.ZIndex = 13
-QueueModeDropdownBtn.Parent = QueueModeFrame
-local UICornerQueueMode = Instance.new("UICorner")
-UICornerQueueMode.CornerRadius = UDim.new(0, 5)
-UICornerQueueMode.Parent = QueueModeDropdownBtn
+-- Mode dropdown
+local RankedModeFrame = Instance.new("Frame")
+RankedModeFrame.Name = "RankedModeFrame"
+RankedModeFrame.Size = UDim2.new(1, 0, 0, 30)
+RankedModeFrame.BackgroundTransparency = 1
+RankedModeFrame.LayoutOrder = 3
+RankedModeFrame.ZIndex = 12
+RankedModeFrame.Parent = RankedScroll
+local RankedModeLabel = Instance.new("TextLabel")
+RankedModeLabel.Size = UDim2.new(0, 100, 1, 0)
+RankedModeLabel.BackgroundTransparency = 1
+RankedModeLabel.Text = "Mode:"
+RankedModeLabel.TextColor3 = Color3.fromRGB(220, 220, 220)
+RankedModeLabel.TextSize = 12
+RankedModeLabel.Font = Enum.Font.GothamSemibold
+RankedModeLabel.TextXAlignment = Enum.TextXAlignment.Left
+RankedModeLabel.ZIndex = 13
+RankedModeLabel.Parent = RankedModeFrame
+local RankedModeDropdownBtn = Instance.new("TextButton")
+RankedModeDropdownBtn.Name = "RankedModeDropdownBtn"
+RankedModeDropdownBtn.Size = UDim2.new(0, 120, 0, 24)
+RankedModeDropdownBtn.Position = UDim2.new(0, 105, 0.5, -12)
+RankedModeDropdownBtn.BackgroundColor3 = Color3.fromRGB(28, 28, 35)
+RankedModeDropdownBtn.BorderSizePixel = 0
+RankedModeDropdownBtn.Text = "1v1 v"
+RankedModeDropdownBtn.TextColor3 = Color3.fromRGB(255, 255, 255)
+RankedModeDropdownBtn.TextSize = 12
+RankedModeDropdownBtn.Font = Enum.Font.Gotham
+RankedModeDropdownBtn.ZIndex = 13
+RankedModeDropdownBtn.Parent = RankedModeFrame
+local UICornerRankedMode = Instance.new("UICorner")
+UICornerRankedMode.CornerRadius = UDim.new(0, 5)
+UICornerRankedMode.Parent = RankedModeDropdownBtn
 
-local QueueModeMenu = Instance.new("ScrollingFrame")
-QueueModeMenu.Name = "QueueModeMenu"
-QueueModeMenu.Size = UDim2.new(0, 120, 0, 0)
-QueueModeMenu.BackgroundColor3 = Color3.fromRGB(25, 25, 32)
-QueueModeMenu.BorderSizePixel = 0
-QueueModeMenu.Visible = false
-QueueModeMenu.ClipsDescendants = true
-QueueModeMenu.ScrollBarThickness = 3
-QueueModeMenu.ScrollBarImageColor3 = Color3.fromRGB(255, 0, 40)
-QueueModeMenu.CanvasSize = UDim2.new(0, 0, 0, 0)
-QueueModeMenu.AutomaticCanvasSize = Enum.AutomaticSize.Y
-QueueModeMenu.ZIndex = 100
-QueueModeMenu.Parent = ScreenGui
-local UICornerQueueModeMenu = Instance.new("UICorner")
-UICornerQueueModeMenu.CornerRadius = UDim.new(0, 5)
-UICornerQueueModeMenu.Parent = QueueModeMenu
-local UIStrokeQueueModeMenu = Instance.new("UIStroke")
-UIStrokeQueueModeMenu.Thickness = 1
-UIStrokeQueueModeMenu.Color = Color3.fromRGB(50, 50, 60)
-UIStrokeQueueModeMenu.Parent = QueueModeMenu
-local UIListQueueModeMenu = Instance.new("UIListLayout")
-UIListQueueModeMenu.SortOrder = Enum.SortOrder.LayoutOrder
-UIListQueueModeMenu.Padding = UDim.new(0, 2)
-UIListQueueModeMenu.Parent = QueueModeMenu
-local UIPaddingQueueModeMenu = Instance.new("UIPadding")
-UIPaddingQueueModeMenu.PaddingTop = UDim.new(0, 2)
-UIPaddingQueueModeMenu.PaddingBottom = UDim.new(0, 2)
-UIPaddingQueueModeMenu.Parent = QueueModeMenu
+local RankedModeMenu = Instance.new("ScrollingFrame")
+RankedModeMenu.Name = "RankedModeMenu"
+RankedModeMenu.Size = UDim2.new(0, 120, 0, 0)
+RankedModeMenu.BackgroundColor3 = Color3.fromRGB(25, 25, 32)
+RankedModeMenu.BorderSizePixel = 0
+RankedModeMenu.Visible = false
+RankedModeMenu.ClipsDescendants = true
+RankedModeMenu.ScrollBarThickness = 3
+RankedModeMenu.ScrollBarImageColor3 = Color3.fromRGB(255, 0, 40)
+RankedModeMenu.CanvasSize = UDim2.new(0, 0, 0, 0)
+RankedModeMenu.AutomaticCanvasSize = Enum.AutomaticSize.Y
+RankedModeMenu.ZIndex = 100
+RankedModeMenu.Parent = ScreenGui
+local UICornerRankedModeMenu = Instance.new("UICorner")
+UICornerRankedModeMenu.CornerRadius = UDim.new(0, 5)
+UICornerRankedModeMenu.Parent = RankedModeMenu
+local UIStrokeRankedModeMenu = Instance.new("UIStroke")
+UIStrokeRankedModeMenu.Thickness = 1
+UIStrokeRankedModeMenu.Color = Color3.fromRGB(50, 50, 60)
+UIStrokeRankedModeMenu.Parent = RankedModeMenu
+local UIListRankedModeMenu = Instance.new("UIListLayout")
+UIListRankedModeMenu.SortOrder = Enum.SortOrder.LayoutOrder
+UIListRankedModeMenu.Padding = UDim.new(0, 2)
+UIListRankedModeMenu.Parent = RankedModeMenu
+local UIPaddingRankedModeMenu = Instance.new("UIPadding")
+UIPaddingRankedModeMenu.PaddingTop = UDim.new(0, 2)
+UIPaddingRankedModeMenu.PaddingBottom = UDim.new(0, 2)
+UIPaddingRankedModeMenu.Parent = RankedModeMenu
 
-local QueueModeOptions = {"1v1", "2v2", "3v3"}
-getgenv().SelectedQueueMode = "1v1"
-local QueueModeMenuOpen = false
-local QueueModeMenuTween = nil
+local RankedModeOptions = {"1v1", "2v2", "3v3"}
+local RankedModeOpen = false
+local RankedModeTween = nil
 
-local function ToggleQueueModeMenu()
-	if QueueModeMenuTween then
-		QueueModeMenuTween:Cancel()
-		QueueModeMenuTween = nil
-	end
-	local absPos = QueueModeDropdownBtn.AbsolutePosition
-	local absSize = QueueModeDropdownBtn.AbsoluteSize
-	QueueModeMenu.Position = UDim2.new(0, absPos.X, 0, absPos.Y + absSize.Y + 2)
-	if QueueModeMenuOpen then
-		QueueModeMenuOpen = false
-		QueueModeMenuTween = TweenService:Create(QueueModeMenu, TweenInfo.new(0.18, Enum.EasingStyle.Quad, Enum.EasingDirection.In), {
-			Size = UDim2.new(0, 120, 0, 0)
-		})
-		QueueModeMenuTween:Play()
-		QueueModeMenuTween.Completed:Connect(function()
-			if not QueueModeMenuOpen then
-				QueueModeMenu.Visible = false
-			end
-		end)
-	else
-		QueueModeMenuOpen = true
-		QueueModeMenu.Visible = true
-		QueueModeMenu.Size = UDim2.new(0, 120, 0, 0)
-		QueueModeMenuTween = TweenService:Create(QueueModeMenu, TweenInfo.new(0.22, Enum.EasingStyle.Quad, Enum.EasingDirection.Out), {
-			Size = UDim2.new(0, 120, 0, 80)
-		})
-		QueueModeMenuTween:Play()
-	end
+local function ToggleRankedModeMenu()
+if RankedModeTween then
+RankedModeTween:Cancel()
+RankedModeTween = nil
+end
+local absPos = RankedModeDropdownBtn.AbsolutePosition
+local absSize = RankedModeDropdownBtn.AbsoluteSize
+RankedModeMenu.Position = UDim2.new(0, absPos.X, 0, absPos.Y + absSize.Y + 2)
+if RankedModeOpen then
+RankedModeOpen = false
+RankedModeTween = TweenService:Create(RankedModeMenu, TweenInfo.new(0.18, Enum.EasingStyle.Quad, Enum.EasingDirection.In), {
+Size = UDim2.new(0, 120, 0, 0)
+})
+RankedModeTween:Play()
+RankedModeTween.Completed:Connect(function()
+if not RankedModeOpen then
+RankedModeMenu.Visible = false
+end
+end)
+else
+RankedModeOpen = true
+RankedModeMenu.Visible = true
+RankedModeMenu.Size = UDim2.new(0, 120, 0, 0)
+RankedModeTween = TweenService:Create(RankedModeMenu, TweenInfo.new(0.22, Enum.EasingStyle.Quad, Enum.EasingDirection.Out), {
+Size = UDim2.new(0, 120, 0, 82)
+})
+RankedModeTween:Play()
+end
 end
 
-for _, mode in ipairs(QueueModeOptions) do
-	local btn = Instance.new("TextButton")
-	btn.Size = UDim2.new(1, 0, 0, 24)
-	btn.BackgroundTransparency = 1
-	btn.Text = mode
-	btn.TextColor3 = Color3.fromRGB(255, 255, 255)
-	btn.TextSize = 12
-	btn.Font = Enum.Font.Gotham
-	btn.ZIndex = 101
-	btn.Parent = QueueModeMenu
-	btn.MouseButton1Click:Connect(function()
-		getgenv().SelectedQueueMode = mode
-		QueueModeDropdownBtn.Text = mode .. " v"
-		if QueueModeMenuOpen then
-			ToggleQueueModeMenu()
-		end
-	end)
+for _, mode in ipairs(RankedModeOptions) do
+local btn = Instance.new("TextButton")
+btn.Size = UDim2.new(1, 0, 0, 24)
+btn.BackgroundTransparency = 1
+btn.Text = mode
+btn.TextColor3 = Color3.fromRGB(255, 255, 255)
+btn.TextSize = 12
+btn.Font = Enum.Font.Gotham
+btn.ZIndex = 101
+btn.Parent = RankedModeMenu
+btn.MouseButton1Click:Connect(function()
+getgenv().RankedQueueMode = mode
+RankedModeDropdownBtn.Text = mode .. " v"
+if RankedModeOpen then
+ToggleRankedModeMenu()
+end
+end)
 end
 
-QueueModeDropdownBtn.MouseButton1Click:Connect(function()
-	ToggleQueueModeMenu()
+RankedModeDropdownBtn.MouseButton1Click:Connect(function()
+ToggleRankedModeMenu()
 end)
 
 UserInputService.InputBegan:Connect(function(input, gameProcessed)
-	if gameProcessed then return end
-	if QueueModeMenuOpen and (input.UserInputType == Enum.UserInputType.MouseButton1 or input.UserInputType == Enum.UserInputType.Touch) then
-		local mousePos = UserInputService:GetMouseLocation()
-		local menuPos = QueueModeMenu.AbsolutePosition
-		local menuSize = QueueModeMenu.AbsoluteSize
-		local btnPos = QueueModeDropdownBtn.AbsolutePosition
-		local btnSize = QueueModeDropdownBtn.AbsoluteSize
-		local insideMenu = mousePos.X >= menuPos.X and mousePos.X <= menuPos.X + menuSize.X and mousePos.Y >= menuPos.Y and mousePos.Y <= menuPos.Y + menuSize.Y
-		local insideBtn = mousePos.X >= btnPos.X and mousePos.X <= btnPos.X + btnSize.X and mousePos.Y >= btnPos.Y and mousePos.Y <= btnPos.Y + btnSize.Y
-		if not insideMenu and not insideBtn then
-			ToggleQueueModeMenu()
-		end
-	end
+if gameProcessed then return end
+if RankedModeOpen and (input.UserInputType == Enum.UserInputType.MouseButton1 or input.UserInputType == Enum.UserInputType.Touch) then
+local mousePos = UserInputService:GetMouseLocation()
+local menuPos = RankedModeMenu.AbsolutePosition
+local menuSize = RankedModeMenu.AbsoluteSize
+local btnPos = RankedModeDropdownBtn.AbsolutePosition
+local btnSize = RankedModeDropdownBtn.AbsoluteSize
+local insideMenu = mousePos.X >= menuPos.X and mousePos.X <= menuPos.X + menuSize.X and mousePos.Y >= menuPos.Y and mousePos.Y <= menuPos.Y + menuSize.Y
+local insideBtn = mousePos.X >= btnPos.X and mousePos.X <= btnPos.X + btnSize.X and mousePos.Y >= btnPos.Y and mousePos.Y <= btnPos.Y + btnSize.Y
+if not insideMenu and not insideBtn then
+ToggleRankedModeMenu()
+end
+end
 end)
 
+local AutoUltToggle = CreateToggle("AutoUlt", "Auto ultimate", "Activates ultimate when fully charged", 4, RankedScroll)
+
+-- ============================================================
+-- THEMES (unchanged)
+-- ============================================================
 local ThemesFrame = Instance.new("Frame")
 ThemesFrame.Name = "ThemesFrame"
 ThemesFrame.Size = UDim2.new(1, 0, 0, 30)
@@ -803,91 +823,91 @@ UIPaddingThemesMenu.PaddingBottom = UDim.new(0, 2)
 UIPaddingThemesMenu.Parent = ThemesMenu
 
 local ThemeOptions = {
-	{Name = "Sukuna", Id = "rbxassetid://6521912809"},
-	{Name = "Gojo & Sukuna", Id = "rbxassetid://88600377162464"},
-	{Name = "Sukuna's Domain", Id = "rbxassetid://72371065739097"},
-	{Name = "Gojo's Domain", Id = "rbxassetid://72201053913853"}
+{Name = "Sukuna", Id = "rbxassetid://6521912809"},
+{Name = "Gojo & Sukuna", Id = "rbxassetid://88600377162464"},
+{Name = "Sukuna's Domain", Id = "rbxassetid://72371065739097"},
+{Name = "Gojo's Domain", Id = "rbxassetid://72201053913853"}
 }
 
 local ThemesMenuOpen = false
 local ThemesMenuTween = nil
 
 local function ApplyTheme(assetId)
-	FPSTab.Image = assetId
-	AutoTab.Image = assetId
-	MiscTab.Image = assetId
-	AimTab.Image = assetId
-	RankedTab.Image = assetId
-	ThemesTab.Image = assetId
+FPSTab.Image = assetId
+AutoTab.Image = assetId
+MiscTab.Image = assetId
+AimTab.Image = assetId
+RankedTab.Image = assetId
+ThemesTab.Image = assetId
 end
 
 local function ToggleThemesMenu()
-	if ThemesMenuTween then
-		ThemesMenuTween:Cancel()
-		ThemesMenuTween = nil
-	end
-	local absPos = ThemesDropdownBtn.AbsolutePosition
-	local absSize = ThemesDropdownBtn.AbsoluteSize
-	ThemesMenu.Position = UDim2.new(0, absPos.X, 0, absPos.Y + absSize.Y + 2)
-	if ThemesMenuOpen then
-		ThemesMenuOpen = false
-		ThemesMenuTween = TweenService:Create(ThemesMenu, TweenInfo.new(0.18, Enum.EasingStyle.Quad, Enum.EasingDirection.In), {
-			Size = UDim2.new(0, 160, 0, 0)
-		})
-		ThemesMenuTween:Play()
-		ThemesMenuTween.Completed:Connect(function()
-			if not ThemesMenuOpen then
-				ThemesMenu.Visible = false
-			end
-		end)
-	else
-		ThemesMenuOpen = true
-		ThemesMenu.Visible = true
-		ThemesMenu.Size = UDim2.new(0, 160, 0, 0)
-		ThemesMenuTween = TweenService:Create(ThemesMenu, TweenInfo.new(0.22, Enum.EasingStyle.Quad, Enum.EasingDirection.Out), {
-			Size = UDim2.new(0, 160, 0, 110)
-		})
-		ThemesMenuTween:Play()
-	end
+if ThemesMenuTween then
+ThemesMenuTween:Cancel()
+ThemesMenuTween = nil
+end
+local absPos = ThemesDropdownBtn.AbsolutePosition
+local absSize = ThemesDropdownBtn.AbsoluteSize
+ThemesMenu.Position = UDim2.new(0, absPos.X, 0, absPos.Y + absSize.Y + 2)
+if ThemesMenuOpen then
+ThemesMenuOpen = false
+ThemesMenuTween = TweenService:Create(ThemesMenu, TweenInfo.new(0.18, Enum.EasingStyle.Quad, Enum.EasingDirection.In), {
+Size = UDim2.new(0, 160, 0, 0)
+})
+ThemesMenuTween:Play()
+ThemesMenuTween.Completed:Connect(function()
+if not ThemesMenuOpen then
+ThemesMenu.Visible = false
+end
+end)
+else
+ThemesMenuOpen = true
+ThemesMenu.Visible = true
+ThemesMenu.Size = UDim2.new(0, 160, 0, 0)
+ThemesMenuTween = TweenService:Create(ThemesMenu, TweenInfo.new(0.22, Enum.EasingStyle.Quad, Enum.EasingDirection.Out), {
+Size = UDim2.new(0, 160, 0, 110)
+})
+ThemesMenuTween:Play()
+end
 end
 
 for i, opt in ipairs(ThemeOptions) do
-	local btn = Instance.new("TextButton")
-	btn.Size = UDim2.new(1, 0, 0, 24)
-	btn.BackgroundTransparency = 1
-	btn.Text = opt.Name
-	btn.TextColor3 = Color3.fromRGB(255, 255, 255)
-	btn.TextSize = 12
-	btn.Font = Enum.Font.Gotham
-	btn.ZIndex = 101
-	btn.Parent = ThemesMenu
-	btn.MouseButton1Click:Connect(function()
-		ThemesDropdownBtn.Text = opt.Name .. " v"
-		ApplyTheme(opt.Id)
-		if ThemesMenuOpen then
-			ToggleThemesMenu()
-		end
-	end)
+local btn = Instance.new("TextButton")
+btn.Size = UDim2.new(1, 0, 0, 24)
+btn.BackgroundTransparency = 1
+btn.Text = opt.Name
+btn.TextColor3 = Color3.fromRGB(255, 255, 255)
+btn.TextSize = 12
+btn.Font = Enum.Font.Gotham
+btn.ZIndex = 101
+btn.Parent = ThemesMenu
+btn.MouseButton1Click:Connect(function()
+ThemesDropdownBtn.Text = opt.Name .. " v"
+ApplyTheme(opt.Id)
+if ThemesMenuOpen then
+ToggleThemesMenu()
+end
+end)
 end
 
 ThemesDropdownBtn.MouseButton1Click:Connect(function()
-	ToggleThemesMenu()
+ToggleThemesMenu()
 end)
 
 UserInputService.InputBegan:Connect(function(input, gameProcessed)
-	if gameProcessed then return end
-	if ThemesMenuOpen and (input.UserInputType == Enum.UserInputType.MouseButton1 or input.UserInputType == Enum.UserInputType.Touch) then
-		local mousePos = UserInputService:GetMouseLocation()
-		local menuPos = ThemesMenu.AbsolutePosition
-		local menuSize = ThemesMenu.AbsoluteSize
-		local btnPos = ThemesDropdownBtn.AbsolutePosition
-		local btnSize = ThemesDropdownBtn.AbsoluteSize
-		local insideMenu = mousePos.X >= menuPos.X and mousePos.X <= menuPos.X + menuSize.X and mousePos.Y >= menuPos.Y and mousePos.Y <= menuPos.Y + menuSize.Y
-		local insideBtn = mousePos.X >= btnPos.X and mousePos.X <= btnPos.X + btnSize.X and mousePos.Y >= btnPos.Y and mousePos.Y <= btnPos.Y + btnSize.Y
-		if not insideMenu and not insideBtn then
-			ToggleThemesMenu()
-		end
-	end
+if gameProcessed then return end
+if ThemesMenuOpen and (input.UserInputType == Enum.UserInputType.MouseButton1 or input.UserInputType == Enum.UserInputType.Touch) then
+local mousePos = UserInputService:GetMouseLocation()
+local menuPos = ThemesMenu.AbsolutePosition
+local menuSize = ThemesMenu.AbsoluteSize
+local btnPos = ThemesDropdownBtn.AbsolutePosition
+local btnSize = ThemesDropdownBtn.AbsoluteSize
+local insideMenu = mousePos.X >= menuPos.X and mousePos.X <= menuPos.X + menuSize.X and mousePos.Y >= menuPos.Y and mousePos.Y <= menuPos.Y + menuSize.Y
+local insideBtn = mousePos.X >= btnPos.X and mousePos.X <= btnPos.X + btnSize.X and mousePos.Y >= btnPos.Y and mousePos.Y <= btnPos.Y + btnSize.Y
+if not insideMenu and not insideBtn then
+ToggleThemesMenu()
+end
+end
 end)
 
 local TargetInputFrame = Instance.new("Frame")
@@ -1290,73 +1310,75 @@ local ModeMenuOpen = false
 local ModeMenuTween = nil
 
 local function ToggleModeMenu()
-	if ModeMenuTween then
-		ModeMenuTween:Cancel()
-		ModeMenuTween = nil
-	end
+if ModeMenuTween then
+ModeMenuTween:Cancel()
+ModeMenuTween = nil
+end
 
-	local absPos = ModeDropdownBtn.AbsolutePosition
-	local absSize = ModeDropdownBtn.AbsoluteSize
+local absPos = ModeDropdownBtn.AbsolutePosition  
+local absSize = ModeDropdownBtn.AbsoluteSize  
 
-	ModeMenu.Position = UDim2.new(0, absPos.X, 0, absPos.Y + absSize.Y + 2)
+ModeMenu.Position = UDim2.new(0, absPos.X, 0, absPos.Y + absSize.Y + 2)  
 
-	if ModeMenuOpen then
-		ModeMenuOpen = false
-		ModeMenuTween = TweenService:Create(ModeMenu, TweenInfo.new(0.18, Enum.EasingStyle.Quad, Enum.EasingDirection.In), {
-			Size = UDim2.new(0, 120, 0, 0)
-		})
-		ModeMenuTween:Play()
-		ModeMenuTween.Completed:Connect(function()
-			if not ModeMenuOpen then
-				ModeMenu.Visible = false
-			end
-		end)
-	else
-		ModeMenuOpen = true
-		ModeMenu.Visible = true
-		ModeMenu.Size = UDim2.new(0, 120, 0, 0)
-		ModeMenuTween = TweenService:Create(ModeMenu, TweenInfo.new(0.22, Enum.EasingStyle.Quad, Enum.EasingDirection.Out), {
-			Size = UDim2.new(0, 120, 0, 56)
-		})
-		ModeMenuTween:Play()
-	end
+if ModeMenuOpen then  
+	ModeMenuOpen = false  
+	ModeMenuTween = TweenService:Create(ModeMenu, TweenInfo.new(0.18, Enum.EasingStyle.Quad, Enum.EasingDirection.In), {  
+		Size = UDim2.new(0, 120, 0, 0)  
+	})  
+	ModeMenuTween:Play()  
+	ModeMenuTween.Completed:Connect(function()  
+		if not ModeMenuOpen then  
+			ModeMenu.Visible = false  
+		end  
+	end)  
+else  
+	ModeMenuOpen = true  
+	ModeMenu.Visible = true  
+	ModeMenu.Size = UDim2.new(0, 120, 0, 0)  
+	ModeMenuTween = TweenService:Create(ModeMenu, TweenInfo.new(0.22, Enum.EasingStyle.Quad, Enum.EasingDirection.Out), {  
+		Size = UDim2.new(0, 120, 0, 56)  
+	})  
+	ModeMenuTween:Play()  
+end
+
 end
 
 ModeDropdownBtn.MouseButton1Click:Connect(function()
-	ToggleModeMenu()
+ToggleModeMenu()
 end)
 
 AutoModeBtn.MouseButton1Click:Connect(function()
-	getgenv().AutoKillMode = "Auto"
-	ModeDropdownBtn.Text = "Auto v"
-	if ModeMenuOpen then
-		ToggleModeMenu()
-	end
+getgenv().AutoKillMode = "Auto"
+ModeDropdownBtn.Text = "Auto v"
+if ModeMenuOpen then
+ToggleModeMenu()
+end
 end)
 ManualModeBtn.MouseButton1Click:Connect(function()
-	getgenv().AutoKillMode = "Manual"
-	ModeDropdownBtn.Text = "Manual v"
-	if ModeMenuOpen then
-		ToggleModeMenu()
-	end
+getgenv().AutoKillMode = "Manual"
+ModeDropdownBtn.Text = "Manual v"
+if ModeMenuOpen then
+ToggleModeMenu()
+end
 end)
 
 UserInputService.InputBegan:Connect(function(input, gameProcessed)
-	if gameProcessed then return end
-	if ModeMenuOpen and (input.UserInputType == Enum.UserInputType.MouseButton1 or input.UserInputType == Enum.UserInputType.Touch) then
-		local mousePos = UserInputService:GetMouseLocation()
-		local menuPos = ModeMenu.AbsolutePosition
-		local menuSize = ModeMenu.AbsoluteSize
-		local btnPos = ModeDropdownBtn.AbsolutePosition
-		local btnSize = ModeDropdownBtn.AbsoluteSize
+if gameProcessed then return end
+if ModeMenuOpen and (input.UserInputType == Enum.UserInputType.MouseButton1 or input.UserInputType == Enum.UserInputType.Touch) then
+local mousePos = UserInputService:GetMouseLocation()
+local menuPos = ModeMenu.AbsolutePosition
+local menuSize = ModeMenu.AbsoluteSize
+local btnPos = ModeDropdownBtn.AbsolutePosition
+local btnSize = ModeDropdownBtn.AbsoluteSize
 
-		local insideMenu = mousePos.X >= menuPos.X and mousePos.X <= menuPos.X + menuSize.X and mousePos.Y >= menuPos.Y and mousePos.Y <= menuPos.Y + menuSize.Y
-		local insideBtn = mousePos.X >= btnPos.X and mousePos.X <= btnPos.X + btnSize.X and mousePos.Y >= btnPos.Y and mousePos.Y <= btnPos.Y + btnSize.Y
+local insideMenu = mousePos.X >= menuPos.X and mousePos.X <= menuPos.X + menuSize.X and mousePos.Y >= menuPos.Y and mousePos.Y <= menuPos.Y + menuSize.Y  
+	local insideBtn = mousePos.X >= btnPos.X and mousePos.X <= btnPos.X + btnSize.X and mousePos.Y >= btnPos.Y and mousePos.Y <= btnPos.Y + btnSize.Y  
 
-		if not insideMenu and not insideBtn then
-			ToggleModeMenu()
-		end
-	end
+	if not insideMenu and not insideBtn then  
+		ToggleModeMenu()  
+	end  
+end
+
 end)
 
 local FPSTabBtn = Instance.new("TextButton")
@@ -1446,6 +1468,7 @@ UICornerMiscTab.Parent = MiscTabBtn
 FPSTabBtn.MouseButton1Click:Connect(function()
 if ModeMenuOpen then ToggleModeMenu() end
 if ThemesMenuOpen then ToggleThemesMenu() end
+if RankedModeOpen then ToggleRankedModeMenu() end
 FPSTab.Visible = true
 AutoTab.Visible = false
 AimTab.Visible = false
@@ -1468,6 +1491,7 @@ end)
 AutoTabBtn.MouseButton1Click:Connect(function()
 if ModeMenuOpen then ToggleModeMenu() end
 if ThemesMenuOpen then ToggleThemesMenu() end
+if RankedModeOpen then ToggleRankedModeMenu() end
 FPSTab.Visible = false
 AutoTab.Visible = true
 AimTab.Visible = false
@@ -1490,6 +1514,7 @@ end)
 AimTabBtn.MouseButton1Click:Connect(function()
 if ModeMenuOpen then ToggleModeMenu() end
 if ThemesMenuOpen then ToggleThemesMenu() end
+if RankedModeOpen then ToggleRankedModeMenu() end
 FPSTab.Visible = false
 AutoTab.Visible = false
 AimTab.Visible = true
@@ -1512,6 +1537,7 @@ end)
 RankedTabBtn.MouseButton1Click:Connect(function()
 if ModeMenuOpen then ToggleModeMenu() end
 if ThemesMenuOpen then ToggleThemesMenu() end
+if RankedModeOpen then ToggleRankedModeMenu() end
 FPSTab.Visible = false
 AutoTab.Visible = false
 AimTab.Visible = false
@@ -1534,6 +1560,7 @@ end)
 ThemesTabBtn.MouseButton1Click:Connect(function()
 if ModeMenuOpen then ToggleModeMenu() end
 if ThemesMenuOpen then ToggleThemesMenu() end
+if RankedModeOpen then ToggleRankedModeMenu() end
 FPSTab.Visible = false
 AutoTab.Visible = false
 AimTab.Visible = false
@@ -1556,6 +1583,7 @@ end)
 MiscTabBtn.MouseButton1Click:Connect(function()
 if ModeMenuOpen then ToggleModeMenu() end
 if ThemesMenuOpen then ToggleThemesMenu() end
+if RankedModeOpen then ToggleRankedModeMenu() end
 FPSTab.Visible = false
 AutoTab.Visible = false
 AimTab.Visible = false
@@ -2190,208 +2218,228 @@ end
 end)
 
 getgenv().RankedFarmEnabled = false
-getgenv().SelectedQueueMode = getgenv().SelectedQueueMode or "1v1"
-
-local AutoQueueEnabled = false
-local QueueConnection = nil
-local AutoUltEnabled = false
-local UltConnection = nil
-local VirtualInputManager = game:GetService("VirtualInputManager")
-
-local function findQueueButton(mode)
-	local playerGui = LocalPlayer:FindFirstChild("PlayerGui")
-	if not playerGui then return nil end
-	for _, gui in pairs(playerGui:GetDescendants()) do
-		if gui:IsA("TextButton") or gui:IsA("ImageButton") then
-			local text = (gui.Text or gui.Name or ""):lower()
-			if mode == "1v1" and (text:find("1v1") or text:find("1 vs 1") or text:find("solo")) then
-				return gui
-			elseif mode == "2v2" and (text:find("2v2") or text:find("2 vs 2") or text:find("duo")) then
-				return gui
-			elseif mode == "3v3" and (text:find("3v3") or text:find("3 vs 3") or text:find("trio")) then
-				return gui
-			end
-		end
-	end
-	return nil
-end
-
-local function clickButton(button)
-	if not button then return end
-	pcall(function()
-		if getconnections then
-			for _, connection in pairs(getconnections(button.MouseButton1Click)) do
-				pcall(function()
-					connection:Fire()
-				end)
-			end
-		end
-	end)
-	pcall(function()
-		local pos = button.AbsolutePosition + (button.AbsoluteSize / 2)
-		VirtualInputManager:SendMouseButtonEvent(pos.X, pos.Y, 0, true, game, 1)
-		task.wait(0.05)
-		VirtualInputManager:SendMouseButtonEvent(pos.X, pos.Y, 0, false, game, 1)
-	end)
-end
-
-local function tryQueue()
-	if not AutoQueueEnabled then return end
-	local button = findQueueButton(getgenv().SelectedQueueMode or "1v1")
-	if button then
-		clickButton(button)
-	end
-end
-
-local function SetAutoQueue(state, mode)
-	AutoQueueEnabled = state
-	if mode then
-		getgenv().SelectedQueueMode = mode
-	end
-	if state then
-		task.spawn(function()
-			while AutoQueueEnabled do
-				tryQueue()
-				task.wait(3)
-			end
-		end)
-	end
-end
-
-local function isUltFull()
-	local playerGui = LocalPlayer:FindFirstChild("PlayerGui")
-	if not playerGui then return false end
-	local possibleBars = {
-		playerGui:FindFirstChild("UltimateBar", true),
-		playerGui:FindFirstChild("UltBar", true),
-		playerGui:FindFirstChild("AwakeningBar", true),
-		playerGui:FindFirstChild("Bar", true)
-	}
-	for _, bar in pairs(possibleBars) do
-		if bar and bar:IsA("Frame") then
-			if bar.Size.X.Scale >= 0.98 then
-				return true
-			end
-		end
-	end
-	for _, gui in pairs(playerGui:GetDescendants()) do
-		if gui:IsA("TextLabel") and (gui.Text:lower():find("ult") or gui.Text:lower():find("awakening")) then
-			if gui.Text:lower():find("full") or gui.Text == "100%" then
-				return true
-			end
-		end
-	end
-	return false
-end
-
-local function activateUltimate()
-	VirtualInputManager:SendKeyEvent(true, Enum.KeyCode.G, false, game)
-	task.wait(0.05)
-	VirtualInputManager:SendKeyEvent(false, Enum.KeyCode.G, false, game)
-end
-
-local function SetAutoUltimate(state)
-	AutoUltEnabled = state
-	if UltConnection then
-		UltConnection:Disconnect()
-		UltConnection = nil
-	end
-	if state then
-		UltConnection = RunService.Heartbeat:Connect(function()
-			if not AutoUltEnabled then return end
-			if isUltFull() then
-				activateUltimate()
-				task.wait(1.5)
-			end
-		end)
-	end
-end
 
 local function isEnemy(player, character)
-	if not player or not character then return false end
-	local playerCount = #Players:GetPlayers()
-	if playerCount == 2 then
-		return true
-	end
-	if character:FindFirstChild("TeammateHighlight") or character:FindFirstChild("AllyHighlight") or (character:FindFirstChildWhichIsA("Highlight") and character:FindFirstChildWhichIsA("Highlight").FillColor == Color3.fromRGB(0, 255, 0)) then
-		return false
-	end
-	if player:GetAttribute("Team") == LocalPlayer:GetAttribute("Team") and player:GetAttribute("Team") ~= nil then
-		return false
-	end
-	if character:GetAttribute("IsTeammate") == true or character:GetAttribute("Ally") == true then
-		return false
-	end
-	return true
+if not player or not character then return false end
+local playerCount = #Players:GetPlayers()
+if playerCount == 2 then
+return true
+end
+if character:FindFirstChild("TeammateHighlight") or character:FindFirstChild("AllyHighlight") or (character:FindFirstChildWhichIsA("Highlight") and character:FindFirstChildWhichIsA("Highlight").FillColor == Color3.fromRGB(0, 255, 0)) then
+return false
+end
+if player:GetAttribute("Team") == LocalPlayer:GetAttribute("Team") and player:GetAttribute("Team") ~= nil then
+return false
+end
+if character:GetAttribute("IsTeammate") == true or character:GetAttribute("Ally") == true then
+return false
+end
+return true
 end
 
 local function StartRankedFarm()
-	local LPlayer = game.Players.LocalPlayer
-	local CRoot
-	local function UpdateCRoot()
-		local LChar = LPlayer.Character
-		if LChar then
-			CRoot = LChar:FindFirstChild("HumanoidRootPart")
-			if not CRoot then
-				LChar.ChildAdded:Wait()
-				CRoot = LChar:WaitForChild("HumanoidRootPart")
-			end
-		end
-	end
-	local function FindRankedTarget()
-		local Dist = math.huge
-		local NearestPlr = nil
-		for _, v in pairs(game.Workspace.Live:GetChildren()) do
-			local plr = game.Players:GetPlayerFromCharacter(v)
-			if plr and v ~= LPlayer.Character then
-				local Humanoid = v:FindFirstChildOfClass("Humanoid")
-				local HumanoidRoot = v:FindFirstChild("HumanoidRootPart")
-				if Humanoid and HumanoidRoot and Humanoid.Health > 0 then
-					if isEnemy(plr, v) then
-						local Mag = (CRoot.Position - HumanoidRoot.Position).Magnitude
-						if Mag < Dist then
-							Dist = Mag
-							NearestPlr = HumanoidRoot
-						end
-					end
-				end
-			end
-		end
-		return NearestPlr
-	end
-	task.spawn(function()
-		while getgenv().RankedFarmEnabled do
-			if not IsDodging then
-				pcall(function()
-					UpdateCRoot()
-					if CRoot then
-						local Found = FindRankedTarget()
-						if Found then
-							LPlayer.Character:SetPrimaryPartCFrame(CFrame.new(Found.Position - Vector3.new(0, Found.Size.Y/2, 0) - Found.CFrame.LookVector * getgenv().TeleportDistance + Vector3.new(0, -6, 0), Found.Position - Vector3.new(0, Found.Size.Y/2, 0)))
-							PerformAttack(Found)
-						end
-					end
-				end)
-			end
-			task.wait(0.015)
-		end
-	end)
-	LPlayer.CharacterAdded:Connect(function()
-		task.wait(1.5)
-		UpdateCRoot()
-	end)
+local LPlayer = game.Players.LocalPlayer
+local CRoot
+local function UpdateCRoot()
+local LChar = LPlayer.Character
+if LChar then
+CRoot = LChar:FindFirstChild("HumanoidRootPart")
+if not CRoot then
+LChar.ChildAdded:Wait()
+CRoot = LChar:WaitForChild("HumanoidRootPart")
+end
+end
+end
+local function FindRankedTarget()
+local Dist = math.huge
+local NearestPlr = nil
+for _, v in pairs(game.Workspace.Live:GetChildren()) do
+local plr = game.Players:GetPlayerFromCharacter(v)
+if plr and v ~= LPlayer.Character then
+local Humanoid = v:FindFirstChildOfClass("Humanoid")
+local HumanoidRoot = v:FindFirstChild("HumanoidRootPart")
+if Humanoid and HumanoidRoot and Humanoid.Health > 0 then
+if isEnemy(plr, v) then
+local Mag = (CRoot.Position - HumanoidRoot.Position).Magnitude
+if Mag < Dist then
+Dist = Mag
+NearestPlr = HumanoidRoot
+end
+end
+end
+end
+end
+return NearestPlr
+end
+task.spawn(function()
+while getgenv().RankedFarmEnabled do
+if not IsDodging then
+pcall(function()
+UpdateCRoot()
+if CRoot then
+local Found = FindRankedTarget()
+if Found then
+LPlayer.Character:SetPrimaryPartCFrame(CFrame.new(Found.Position - Vector3.new(0, Found.Size.Y/2, 0) - Found.CFrame.LookVector * getgenv().TeleportDistance + Vector3.new(0, -6, 0), Found.Position - Vector3.new(0, Found.Size.Y/2, 0)))
+PerformAttack(Found)
+end
+end
+end)
+end
+task.wait(0.015)
+end
+end)
+LPlayer.CharacterAdded:Connect(function()
+task.wait(1.5)
+UpdateCRoot()
+end)
 end
 
+-- ============================================================
+-- AUTO QUEUE SYSTEM
+-- ============================================================
+getgenv().AutoQueueEnabled = false
+getgenv().RankedQueueMode = "1v1"
+
+local function findQueueButton(mode)
+local PlayerGui = LocalPlayer:FindFirstChild("PlayerGui")
+if not PlayerGui then return nil end
+for _, gui in pairs(PlayerGui:GetDescendants()) do
+if gui:IsA("TextButton") or gui:IsA("ImageButton") then
+local text = (gui.Text or gui.Name or ""):lower()
+if mode == "1v1" and (text:find("1v1") or text:find("1 vs 1") or text:find("solo")) then
+return gui
+elseif mode == "2v2" and (text:find("2v2") or text:find("2 vs 2") or text:find("duo")) then
+return gui
+elseif mode == "3v3" and (text:find("3v3") or text:find("3 vs 3") or text:find("trio")) then
+return gui
+end
+end
+end
+return nil
+end
+
+local function clickQueueButton(button)
+if not button then return end
+pcall(function()
+if getconnections then
+for _, connection in pairs(getconnections(button.MouseButton1Click)) do
+pcall(function() connection:Fire() end)
+end
+end
+end)
+pcall(function()
+local vim = game:GetService("VirtualInputManager")
+local pos = button.AbsolutePosition + (button.AbsoluteSize / 2)
+vim:SendMouseButtonEvent(pos.X, pos.Y, 0, true, game, 1)
+task.wait(0.05)
+vim:SendMouseButtonEvent(pos.X, pos.Y, 0, false, game, 1)
+end)
+end
+
+local AutoQueueThread = nil
+local function StartAutoQueue()
+if AutoQueueThread then return end
+AutoQueueThread = task.spawn(function()
+while getgenv().AutoQueueEnabled do
+pcall(function()
+local btn = findQueueButton(getgenv().RankedQueueMode)
+if btn then
+clickQueueButton(btn)
+end
+end)
+task.wait(3)
+end
+AutoQueueThread = nil
+end)
+end
+
+-- ============================================================
+-- AUTO ULTIMATE SYSTEM
+-- ============================================================
+getgenv().AutoUltEnabled = false
+
+local function isUltFull()
+local playerGui = LocalPlayer:FindFirstChild("PlayerGui")
+if not playerGui then return false end
+local possibleBars = {
+playerGui:FindFirstChild("UltimateBar", true),
+playerGui:FindFirstChild("UltBar", true),
+playerGui:FindFirstChild("AwakeningBar", true),
+playerGui:FindFirstChild("Bar", true)
+}
+for _, bar in pairs(possibleBars) do
+if bar and bar:IsA("Frame") then
+if bar.Size.X.Scale >= 0.98 then
+return true
+end
+end
+end
+for _, gui in pairs(playerGui:GetDescendants()) do
+if gui:IsA("TextLabel") and (gui.Text:lower():find("ult") or gui.Text:lower():find("awakening")) then
+if gui.Text:lower():find("full") or gui.Text == "100%" then
+return true
+end
+end
+end
+return false
+end
+
+local function activateUltimate()
+local vim = game:GetService("VirtualInputManager")
+vim:SendKeyEvent(true, Enum.KeyCode.G, false, game)
+task.wait(0.05)
+vim:SendKeyEvent(false, Enum.KeyCode.G, false, game)
+end
+
+local AutoUltConnection = nil
+local function StartAutoUlt()
+if AutoUltConnection then
+AutoUltConnection:Disconnect()
+AutoUltConnection = nil
+end
+AutoUltConnection = RunService.Heartbeat:Connect(function()
+if not getgenv().AutoUltEnabled then return end
+if isUltFull() then
+activateUltimate()
+task.wait(1.5)
+end
+end)
+end
+
+-- ============================================================
+-- WIRE UP TOGGLES
+-- ============================================================
+AutoQueueToggle.SetCallback(function(state)
+getgenv().AutoQueueEnabled = state
+if state then
+StartAutoQueue()
+end
+end)
+
+AutoUltToggle.SetCallback(function(state)
+getgenv().AutoUltEnabled = state
+if state then
+StartAutoUlt()
+else
+if AutoUltConnection then
+AutoUltConnection:Disconnect()
+AutoUltConnection = nil
+end
+end
+end)
+
 RankedFarmToggle.SetCallback(function(state)
-	getgenv().RankedFarmEnabled = state
-	if state then
-		StartRankedFarm()
-		SetAutoQueue(true, getgenv().SelectedQueueMode or "1v1")
-		SetAutoUltimate(true)
-	else
-		SetAutoQueue(false)
-		SetAutoUltimate(false)
-	end
+getgenv().RankedFarmEnabled = state
+if state then
+StartRankedFarm()
+-- Fully automatic: also enable auto queue + auto ultimate
+AutoQueueToggle.SetState(true)
+AutoUltToggle.SetState(true)
+else
+-- Turn off dependent systems when ranked farm is disabled
+AutoQueueToggle.SetState(false)
+AutoUltToggle.SetState(false)
+end
 end)
 
 local CamlockState = false
@@ -2486,8 +2534,9 @@ if not humanoid then return end
 
 local conn1 = RunService.Heartbeat:Connect(function()
 if not AntiRagdollEnabled then return end
-local state = humanoid:GetState()
-if state == Enum.HumanoidStateType.Physics or state == Enum.HumanoidStateType.Ragdoll or state == Enum.HumanoidStateType.FallingDown then
+if humanoid:GetState() == Enum.HumanoidStateType.Physics or
+humanoid:GetState() == Enum.HumanoidStateType.Ragdoll or
+humanoid:GetState() == Enum.HumanoidStateType.FallingDown then
 humanoid:ChangeState(Enum.HumanoidStateType.GettingUp)
 humanoid:ChangeState(Enum.HumanoidStateType.Running)
 end
