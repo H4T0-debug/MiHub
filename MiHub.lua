@@ -1,7 +1,10 @@
 local Players = game:GetService("Players")
 local UserInputService = game:GetService("UserInputService")
 local TweenService = game:GetService("TweenService")
-local UserGameSettings = UserSettings():GetService("UserGameSettings")
+local UserGameSettings = nil
+pcall(function()
+	UserGameSettings = UserSettings():GetService("UserGameSettings")
+end)
 local RunService = game:GetService("RunService")
 local CoreGui = game:GetService("CoreGui")
 local LocalPlayer = Players.LocalPlayer
@@ -9,19 +12,7 @@ local ScreenGui = Instance.new("ScreenGui")
 ScreenGui.Name = "MiHubGui"
 ScreenGui.ResetOnSpawn = false
 ScreenGui.ZIndexBehavior = Enum.ZIndexBehavior.Sibling
-pcall(function()
-	if gethui then
-		ScreenGui.Parent = gethui()
-	elseif syn and syn.protect_gui then
-		syn.protect_gui(ScreenGui)
-		ScreenGui.Parent = CoreGui
-	else
-		ScreenGui.Parent = CoreGui
-	end
-end)
-if not ScreenGui.Parent then
-	ScreenGui.Parent = CoreGui
-end
+ScreenGui.Parent = CoreGui
 local NoRenderOverlay = Instance.new("ImageLabel")
 NoRenderOverlay.Name = "NoRenderOverlay"
 NoRenderOverlay.Size = UDim2.new(1, 0, 1, 0)
@@ -538,13 +529,18 @@ end
 
 local MuteSoundToggle = CreateToggle("MuteSound", "Mute Sound", "Mutes all in-game audio", 5, FPSScroll)
 local NoRenderToggle = CreateToggle("NoRender", "No Render", "Covers screen with black texture", 6, FPSScroll)
-local storedVolume = UserGameSettings.MasterVolume
+local storedVolume = 1
+if UserGameSettings then
+	storedVolume = UserGameSettings.MasterVolume
+end
 MuteSoundToggle.SetCallback(function(state)
+if UserGameSettings then
 if state then
 storedVolume = UserGameSettings.MasterVolume
 UserGameSettings.MasterVolume = 0
 else
 UserGameSettings.MasterVolume = storedVolume or 1
+end
 end
 end)
 NoRenderToggle.SetCallback(function(state)
