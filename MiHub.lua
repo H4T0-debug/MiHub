@@ -2732,7 +2732,6 @@ AntiStunToggle.SetCallback(function(state)
 SetAntiStun(state)
 end)
 
-local Stats = game:GetService("Stats")
 local AutoK1NGEnabled = false
 local AutoK1NGCooldown = 0
 local AutoK1NGInCooldown = false
@@ -2740,10 +2739,11 @@ local AutoK1NGInCooldown = false
 local function AutoK1NGGetCooldown()
     local n2 = 0
     pcall(function()
-        n2 = Stats.Network.ServerStatsItem["Data Ping"]:GetValue()
+        local StatsService = game:GetService("Stats")
+        n2 = StatsService.Network.ServerStatsItem["Data Ping"]:GetValue()
     end)
     local v39 = n2 / 1000
-    return (math.clamp(0.19 + v39 * 0.5, 0.05, 0.35))
+    return math.clamp(0.19 + v39 * 0.5, 0.05, 0.35)
 end
 
 local function AutoK1NGRun()
@@ -2755,15 +2755,14 @@ local function AutoK1NGRun()
     local HumanoidRootPart = Character:WaitForChild("HumanoidRootPart")
     local Animator = Humanoid:WaitForChild("Animator")
 
-    Animator.AnimationPlayed:Connect(function(animation)
+    Animator.AnimationPlayed:Connect(function(animationTrack)
         if not AutoK1NGEnabled or AutoK1NGInCooldown then
             return
         end
-        local Animation = animation.Animation
-        if Animation then
-            Animation = animation.Animation.AnimationId
-        end
-        if Animation ~= "rbxassetid://10503381238" then
+        local anim = animationTrack.Animation
+        if not anim then return end
+        local animId = anim.AnimationId
+        if animId ~= "rbxassetid://10503381238" then
             return
         end
         AutoK1NGInCooldown = true
@@ -2772,24 +2771,29 @@ local function AutoK1NGRun()
         end
         AutoK1NGInCooldown = false
         task.wait(0.35)
-        Humanoid:ChangeState(Enum.HumanoidStateType.Jumping)
-        HumanoidRootPart.Velocity = Vector3.new(HumanoidRootPart.Velocity.X, 60, HumanoidRootPart.Velocity.Z)
-        local Communicate = Character:WaitForChild("Communicate")
-        local W = Enum.KeyCode.W
-        local Q = Enum.KeyCode.Q
-        Communicate:FireServer({
-            Dash = W,
-            Key = Q,
-            Goal = "KeyPress"
-        })
+        pcall(function()
+            Humanoid:ChangeState(Enum.HumanoidStateType.Jumping)
+            HumanoidRootPart.Velocity = Vector3.new(HumanoidRootPart.Velocity.X, 60, HumanoidRootPart.Velocity.Z)
+            local Communicate = Character:FindFirstChild("Communicate")
+            if Communicate then
+                Communicate:FireServer({
+                    Dash = Enum.KeyCode.W,
+                    Key = Enum.KeyCode.Q,
+                    Goal = "KeyPress"
+                })
+            end
+        end)
         task.delay(AutoK1NGGetCooldown(), function()
             local CurrentCamera = workspace.CurrentCamera
             if CurrentCamera then
                 local CurrentCameraCFrame = CurrentCamera.CFrame
                 local LookVector = CurrentCameraCFrame.LookVector
-                local v61 = -Vector3.new(LookVector.X, 0, LookVector.Z).Unit
-                local vector3 = Vector3.new(v61.X, LookVector.Y, v61.Z)
-                CurrentCamera.CFrame = CFrame.new(CurrentCameraCFrame.Position, CurrentCameraCFrame.Position + vector3)
+                local v61 = -Vector3.new(LookVector.X, 0, LookVector.Z)
+                if v61.Magnitude > 0 then
+                    v61 = v61.Unit
+                    local vector3 = Vector3.new(v61.X, LookVector.Y, v61.Z)
+                    CurrentCamera.CFrame = CFrame.new(CurrentCameraCFrame.Position, CurrentCameraCFrame.Position + vector3)
+                end
             end
         end)
     end)
@@ -2809,12 +2813,11 @@ local LoopDashEnabled = false
 local AnimConnection = nil
 local FaceConnection = nil
 local CurrentTarget = nil
-
 local DASH_ANIM = "rbxassetid://10503381238"
 
 local function getCharacter()
     local char = LocalPlayer.Character
-    if not char then return end
+    if not char then return nil, nil, nil, nil end
     local humanoid = char:FindFirstChildOfClass("Humanoid")
     local hrp = char:FindFirstChild("HumanoidRootPart")
     local animator = humanoid and humanoid:FindFirstChildOfClass("Animator")
@@ -2824,9 +2827,7 @@ end
 local function getClosestEnemy()
     local _, _, myHRP = getCharacter()
     if not myHRP then return nil end
-
     local closest, shortest = nil, math.huge
-
     for _, plr in ipairs(Players:GetPlayers()) do
         if plr ~= LocalPlayer and plr.Character then
             local hum = plr.Character:FindFirstChildOfClass("Humanoid")
@@ -2840,64 +2841,68 @@ local function getClosestEnemy()
             end
         end
     end
-
     return closest
 end
 
 local function fireDash()
     local char = LocalPlayer.Character
     if not char then return end
-
     local communicate = char:FindFirstChild("Communicate")
     if not communicate then return end
-
     pcall(function()
         communicate:FireServer({
-            {
-                Dash = Enum.KeyCode.W,
-                Key = Enum.KeyCode.Q,
-                Goal = "KeyPress",
-            }
+            Dash = Enum.KeyCode.W,
+            Key = Enum.KeyCode.Q,
+            Goal = "KeyPress"
         })
     end)
 end
 
 local function onAnimationPlayed(track)
     if not LoopDashEnabled then return end
-
     local anim = track.Animation
     if not anim then return end
-    if anim.AnimationId ~= DASH_ANIM and not anim.AnimationId:find("10503381238") then
+    local id = tostring(anim.AnimationId or "")
+    if id ~= DASH_ANIM and not string.find(id, "10503381238") then
         return
     end
-
     CurrentTarget = getClosestEnemy()
-
     local renderConn
     renderConn = RunService.RenderStepped:Connect(function()
-        if not track.IsPlaying then
-            local _, _, hrp = getCharacter()
-            if hrp then
-                hrp.CFrame = hrp.CFrame - (hrp.CFrame.LookVector * 4.5)
-            end
-            fireDash()
-            renderConn:Disconnect()
+        if not LoopDashEnabled then
+            if renderConn then renderConn:Disconnect() end
             return
         end
-
-        local remaining = track.Length - track.TimePosition
+        local playing = false
+        pcall(function() playing = track.IsPlaying end)
+        if not playing then
+            local _, _, hrp = getCharacter()
+            if hrp then
+                pcall(function()
+                    hrp.CFrame = hrp.CFrame - (hrp.CFrame.LookVector * 4.5)
+                end)
+            end
+            fireDash()
+            if renderConn then renderConn:Disconnect() end
+            return
+        end
+        local remaining = 999
+        pcall(function()
+            remaining = track.Length - track.TimePosition
+        end)
         if remaining <= 0.3 then
             local _, _, hrp = getCharacter()
             if hrp then
-                hrp.CFrame = hrp.CFrame - (hrp.CFrame.LookVector * 4.5)
+                pcall(function()
+                    hrp.CFrame = hrp.CFrame - (hrp.CFrame.LookVector * 4.5)
+                end)
             end
             fireDash()
         end
     end)
-
     task.delay(2.7, function()
         if renderConn then
-            renderConn:Disconnect()
+            pcall(function() renderConn:Disconnect() end)
         end
     end)
 end
@@ -2905,51 +2910,49 @@ end
 local function startLoopDash()
     local char, humanoid, hrp, animator = getCharacter()
     if not animator then return end
-
     if AnimConnection then
-        AnimConnection:Disconnect()
+        pcall(function() AnimConnection:Disconnect() end)
+        AnimConnection = nil
     end
     if FaceConnection then
-        FaceConnection:Disconnect()
+        pcall(function() FaceConnection:Disconnect() end)
+        FaceConnection = nil
     end
-
     AnimConnection = animator.AnimationPlayed:Connect(onAnimationPlayed)
-
     FaceConnection = RunService.RenderStepped:Connect(function()
         if not LoopDashEnabled then return end
         if not CurrentTarget or not CurrentTarget.Parent then return end
-
         local _, _, myHRP = getCharacter()
         if not myHRP then return end
-
         local targetHum = CurrentTarget.Parent:FindFirstChildOfClass("Humanoid")
         if targetHum and targetHum.Health > 0 then
-            myHRP.CFrame = CFrame.lookAt(
-                myHRP.Position,
-                Vector3.new(CurrentTarget.Position.X, myHRP.Position.Y, CurrentTarget.Position.Z)
-            )
-
-            local cam = workspace.CurrentCamera
-            if cam then
-                cam.CFrame = CFrame.lookAt(cam.CFrame.Position, CurrentTarget.Position)
-            end
+            pcall(function()
+                myHRP.CFrame = CFrame.lookAt(
+                    myHRP.Position,
+                    Vector3.new(CurrentTarget.Position.X, myHRP.Position.Y, CurrentTarget.Position.Z)
+                )
+                local cam = workspace.CurrentCamera
+                if cam then
+                    cam.CFrame = CFrame.lookAt(cam.CFrame.Position, CurrentTarget.Position)
+                end
+            end)
         end
     end)
 end
 
 local function stopLoopDash()
     if AnimConnection then
-        AnimConnection:Disconnect()
+        pcall(function() AnimConnection:Disconnect() end)
         AnimConnection = nil
     end
     if FaceConnection then
-        FaceConnection:Disconnect()
+        pcall(function() FaceConnection:Disconnect() end)
         FaceConnection = nil
     end
     CurrentTarget = nil
 end
 
-function SetLoopDash(state)
+local function SetLoopDash(state)
     LoopDashEnabled = state
     if state then
         startLoopDash()
