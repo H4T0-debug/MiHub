@@ -2513,6 +2513,7 @@ AutoUltToggle.SetState(false)
 end
 end)
 
+;(function()
 local AutoK1NGEnabled = false
 local AutoK1NGCooldown = 0
 local AutoK1NGInCooldown = false
@@ -2575,10 +2576,10 @@ end)
 end)
 end
 
-AutoK1NGRun()
+task.spawn(AutoK1NGRun)
 LocalPlayer.CharacterAdded:Connect(function()
 task.wait(1)
-AutoK1NGRun()
+task.spawn(AutoK1NGRun)
 end)
 
 AutoK1NGToggle.SetCallback(function(state)
@@ -2668,10 +2669,10 @@ local char, humanoid, hrp, animator = AutoSupaGetCharacter()
 animator.AnimationPlayed:Connect(AutoSupaOnAnimationPlayed)
 end
 
-AutoSupaSetup()
+task.spawn(AutoSupaSetup)
 LocalPlayer.CharacterAdded:Connect(function()
 task.wait(1)
-AutoSupaSetup()
+task.spawn(AutoSupaSetup)
 end)
 
 AutoSupaToggle.SetCallback(function(state)
@@ -2680,6 +2681,7 @@ if not state then
 AutoSupaDetach()
 end
 end)
+end)()
 
 local CamlockState = false
 local Prediction = 0.16
