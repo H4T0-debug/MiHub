@@ -2733,6 +2733,7 @@ end)
 
 local AutoK1NGEnabled = false
 local AutoK1NGInCooldown = false
+local AutoK1NGAnimationConnection = nil
 
 local function AutoK1NGGetCooldown()
     local n2 = 0
@@ -2751,7 +2752,12 @@ local function AutoK1NGRun()
     local HumanoidRootPart = Character:WaitForChild("HumanoidRootPart")
     local Animator = Humanoid:WaitForChild("Animator")
 
-    Animator.AnimationPlayed:Connect(function(track)
+    if AutoK1NGAnimationConnection then
+        AutoK1NGAnimationConnection:Disconnect()
+        AutoK1NGAnimationConnection = nil
+    end
+
+    AutoK1NGAnimationConnection = Animator.AnimationPlayed:Connect(function(track)
         if not AutoK1NGEnabled or AutoK1NGInCooldown then return end
         local anim = track.Animation
         if not anim or anim.AnimationId ~= "rbxassetid://10503381238" then return end
@@ -2961,6 +2967,7 @@ local humanoid = character:FindFirstChildOfClass("Humanoid")
 if not humanoid then return end
 
 local Camera = workspace.CurrentCamera
+if not Camera then return end
 Camera.CameraType = Enum.CameraType.Custom
 Camera.CameraSubject = humanoid
 
