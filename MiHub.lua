@@ -640,8 +640,8 @@ local FixCameraPadding = Instance.new("UIPadding")
 FixCameraPadding.PaddingLeft = UDim.new(0, 12)
 FixCameraPadding.Parent = FixCameraBtn
 local AimBotToggle = CreateToggle("AimBot", "Aim bot", "Locks camera to nearest enemy", 1, AimScroll)
-local AutoK1NGToggle = CreateToggle("AutoK1NG", "Auto K1NG", "Automatically performs K1NG tech on animation", 1, AutoTechsScroll)
-local AutoSupaToggle = CreateToggle("AutoSupa", "Auto Supa", "Automatically performs Supa tech on animation", 2, AutoTechsScroll)
+local AutoSupaToggle = CreateToggle("AutoSupa", "Auto K1NG", "Automatically performs Supa tech on animation", 1, AutoTechsScroll)
+local AutoSupaNewToggle = CreateToggle("AutoSupaNew", "Auto Supa", "Attaches to closest enemy on dash", 2, AutoTechsScroll)
 
 local RankedFarmToggle = CreateToggle("RankedFarm", "Ranked farm", "Farms ranked matches automatically", 1, RankedScroll)
 local AutoQueueToggle = CreateToggle("AutoQueue", "Auto queue", "Automatically queues the selected mode", 2, RankedScroll)
@@ -2513,12 +2513,11 @@ AutoUltToggle.SetState(false)
 end
 end)
 
-;(function()
-local AutoK1NGEnabled = false
-local AutoK1NGCooldown = 0
-local AutoK1NGInCooldown = false
+local AutoSupaEnabled = false
+local AutoSupaCooldown = 0
+local AutoSupaInCooldown = false
 
-local function AutoK1NGGetCooldown()
+local function AutoSupaGetCooldown()
 local n2 = 0
 pcall(function()
 n2 = Stats.Network.ServerStatsItem["Data Ping"]:GetValue()
@@ -2527,7 +2526,7 @@ local v39 = n2 / 1000
 return (math.clamp(0.19 + v39 * 0.5, 0.05, 0.35))
 end
 
-local function AutoK1NGRun()
+local function AutoSupaRun()
 local Character = LocalPlayer.Character
 if not Character then
 Character = LocalPlayer.CharacterAdded:Wait()
@@ -2537,7 +2536,7 @@ local HumanoidRootPart = Character:WaitForChild("HumanoidRootPart")
 local Animator = Humanoid:WaitForChild("Animator")
 
 Animator.AnimationPlayed:Connect(function(animation)
-if not AutoK1NGEnabled or AutoK1NGInCooldown then
+if not AutoSupaEnabled or AutoSupaInCooldown then
 return
 end
 local Animation = animation.Animation
@@ -2547,11 +2546,11 @@ end
 if Animation ~= "rbxassetid://10503381238" then
 return
 end
-AutoK1NGInCooldown = true
-if AutoK1NGCooldown > 0 then
-task.wait(AutoK1NGCooldown)
+AutoSupaInCooldown = true
+if AutoSupaCooldown > 0 then
+task.wait(AutoSupaCooldown)
 end
-AutoK1NGInCooldown = false
+AutoSupaInCooldown = false
 task.wait(0.35)
 Humanoid:ChangeState(Enum.HumanoidStateType.Jumping)
 HumanoidRootPart.Velocity = Vector3.new(HumanoidRootPart.Velocity.X, 60, HumanoidRootPart.Velocity.Z)
@@ -2563,7 +2562,7 @@ Dash = W,
 Key = Q,
 Goal = "KeyPress"
 })
-task.delay(AutoK1NGGetCooldown(), function()
+task.delay(AutoSupaGetCooldown(), function()
 local CurrentCamera = workspace.CurrentCamera
 if CurrentCamera then
 local CurrentCameraCFrame = CurrentCamera.CFrame
@@ -2576,21 +2575,22 @@ end)
 end)
 end
 
-task.spawn(AutoK1NGRun)
+AutoSupaRun()
 LocalPlayer.CharacterAdded:Connect(function()
 task.wait(1)
-task.spawn(AutoK1NGRun)
+AutoSupaRun()
 end)
 
-AutoK1NGToggle.SetCallback(function(state)
-AutoK1NGEnabled = state
+AutoSupaToggle.SetCallback(function(state)
+AutoSupaEnabled = state
 end)
 
-local AutoSupaEnabled = false
-local AutoSupaAttachment = nil
-local AutoSupaTargetCharacter = nil
+local AutoSupaNewEnabled = false
+local SupaNewAttachment = nil
+local SupaNewTargetCharacter = nil
+local SupaNewDashAnim = "rbxassetid://10503381238"
 
-local function AutoSupaGetCharacter()
+local function SupaNewGetCharacter()
 local char = LocalPlayer.Character or LocalPlayer.CharacterAdded:Wait()
 local humanoid = char:WaitForChild("Humanoid")
 local hrp = char:WaitForChild("HumanoidRootPart")
@@ -2598,7 +2598,7 @@ local animator = humanoid:WaitForChild("Animator")
 return char, humanoid, hrp, animator
 end
 
-local function AutoSupaGetClosestEnemy()
+local function SupaNewGetClosestEnemy()
 local myHRP = LocalPlayer.Character and LocalPlayer.Character:FindFirstChild("HumanoidRootPart")
 if not myHRP then return nil end
 local closest, dist = nil, 25
@@ -2618,15 +2618,15 @@ end
 return closest
 end
 
-local function AutoSupaAttachToTarget(targetChar)
+local function SupaNewAttachToTarget(targetChar)
 local myChar = LocalPlayer.Character
 if not myChar or not targetChar then return end
 local myHRP = myChar:FindFirstChild("HumanoidRootPart")
 local targetHRP = targetChar:FindFirstChild("HumanoidRootPart")
 if not myHRP or not targetHRP then return end
-if AutoSupaAttachment then
-AutoSupaAttachment:Destroy()
-AutoSupaAttachment = nil
+if SupaNewAttachment then
+SupaNewAttachment:Destroy()
+SupaNewAttachment = nil
 end
 local weld = Instance.new("Weld")
 weld.Name = "SupaAttach"
@@ -2634,54 +2634,53 @@ weld.Part0 = targetHRP
 weld.Part1 = myHRP
 weld.C0 = CFrame.new(0, 0, 0)
 weld.Parent = targetHRP
-AutoSupaAttachment = weld
-AutoSupaTargetCharacter = targetChar
+SupaNewAttachment = weld
+SupaNewTargetCharacter = targetChar
 end
 
-local function AutoSupaDetach()
-if AutoSupaAttachment then
-AutoSupaAttachment:Destroy()
-AutoSupaAttachment = nil
+local function SupaNewDetach()
+if SupaNewAttachment then
+SupaNewAttachment:Destroy()
+SupaNewAttachment = nil
 end
-AutoSupaTargetCharacter = nil
+SupaNewTargetCharacter = nil
 end
 
-local function AutoSupaOnAnimationPlayed(animTrack)
-if not AutoSupaEnabled then return end
+local function SupaNewOnAnimationPlayed(animTrack)
+if not AutoSupaNewEnabled then return end
 local anim = animTrack.Animation
-if not anim or anim.AnimationId ~= "rbxassetid://10503381238" then return end
-local target = AutoSupaGetClosestEnemy()
+if not anim or anim.AnimationId ~= SupaNewDashAnim then return end
+local target = SupaNewGetClosestEnemy()
 if target then
-AutoSupaAttachToTarget(target)
+SupaNewAttachToTarget(target)
 end
 animTrack.Stopped:Once(function()
-AutoSupaDetach()
+SupaNewDetach()
 end)
 task.delay(0.6, function()
-if AutoSupaAttachment then
-AutoSupaDetach()
+if SupaNewAttachment then
+SupaNewDetach()
 end
 end)
 end
 
-local function AutoSupaSetup()
-local char, humanoid, hrp, animator = AutoSupaGetCharacter()
-animator.AnimationPlayed:Connect(AutoSupaOnAnimationPlayed)
+local function SupaNewSetup()
+local char, humanoid, hrp, animator = SupaNewGetCharacter()
+animator.AnimationPlayed:Connect(SupaNewOnAnimationPlayed)
 end
 
-task.spawn(AutoSupaSetup)
+SupaNewSetup()
 LocalPlayer.CharacterAdded:Connect(function()
 task.wait(1)
-task.spawn(AutoSupaSetup)
+SupaNewSetup()
 end)
 
-AutoSupaToggle.SetCallback(function(state)
-AutoSupaEnabled = state
+AutoSupaNewToggle.SetCallback(function(state)
+AutoSupaNewEnabled = state
 if not state then
-AutoSupaDetach()
+SupaNewDetach()
 end
 end)
-end)()
 
 local CamlockState = false
 local Prediction = 0.16
