@@ -1354,24 +1354,24 @@ local absSize = ModeDropdownBtn.AbsoluteSize
 ModeMenu.Position = UDim2.new(0, absPos.X, 0, absPos.Y + absSize.Y + 2)  
 
 if ModeMenuOpen then  
-	ModeMenuOpen = false  
-	ModeMenuTween = TweenService:Create(ModeMenu, TweenInfo.new(0.18, Enum.EasingStyle.Quad, Enum.EasingDirection.In), {  
-		Size = UDim2.new(0, 120, 0, 0)  
-	})  
-	ModeMenuTween:Play()  
-	ModeMenuTween.Completed:Connect(function()  
-		if not ModeMenuOpen then  
-			ModeMenu.Visible = false  
-		end  
-	end)  
+    ModeMenuOpen = false  
+    ModeMenuTween = TweenService:Create(ModeMenu, TweenInfo.new(0.18, Enum.EasingStyle.Quad, Enum.EasingDirection.In), {  
+        Size = UDim2.new(0, 120, 0, 0)  
+    })  
+    ModeMenuTween:Play()  
+    ModeMenuTween.Completed:Connect(function()  
+        if not ModeMenuOpen then  
+            ModeMenu.Visible = false  
+        end  
+    end)  
 else  
-	ModeMenuOpen = true  
-	ModeMenu.Visible = true  
-	ModeMenu.Size = UDim2.new(0, 120, 0, 0)  
-	ModeMenuTween = TweenService:Create(ModeMenu, TweenInfo.new(0.22, Enum.EasingStyle.Quad, Enum.EasingDirection.Out), {  
-		Size = UDim2.new(0, 120, 0, 56)  
-	})  
-	ModeMenuTween:Play()  
+    ModeMenuOpen = true  
+    ModeMenu.Visible = true  
+    ModeMenu.Size = UDim2.new(0, 120, 0, 0)  
+    ModeMenuTween = TweenService:Create(ModeMenu, TweenInfo.new(0.22, Enum.EasingStyle.Quad, Enum.EasingDirection.Out), {  
+        Size = UDim2.new(0, 120, 0, 56)  
+    })  
+    ModeMenuTween:Play()  
 end
 
 end
@@ -1405,11 +1405,11 @@ local btnPos = ModeDropdownBtn.AbsolutePosition
 local btnSize = ModeDropdownBtn.AbsoluteSize
 
 local insideMenu = mousePos.X >= menuPos.X and mousePos.X <= menuPos.X + menuSize.X and mousePos.Y >= menuPos.Y and mousePos.Y <= menuPos.Y + menuSize.Y  
-	local insideBtn = mousePos.X >= btnPos.X and mousePos.X <= btnPos.X + btnSize.X and mousePos.Y >= btnPos.Y and mousePos.Y <= btnPos.Y + btnSize.Y  
+    local insideBtn = mousePos.X >= btnPos.X and mousePos.X <= btnPos.X + btnSize.X and mousePos.Y >= btnPos.Y and mousePos.Y <= btnPos.Y + btnSize.Y  
 
-	if not insideMenu and not insideBtn then  
-		ToggleModeMenu()  
-	end  
+    if not insideMenu and not insideBtn then  
+        ToggleModeMenu()  
+    end  
 end
 
 end)
@@ -2735,64 +2735,64 @@ local AutoK1NGEnabled = false
 local AutoK1NGInCooldown = false
 
 local function AutoK1NGGetCooldown()
-	local n2 = 0
-	pcall(function()
-		n2 = game:GetService("Stats").Network.ServerStatsItem["Data Ping"]:GetValue()
-	end)
-	return math.clamp(0.19 + (n2 / 1000) * 0.5, 0.05, 0.35)
+    local n2 = 0
+    pcall(function()
+        n2 = game:GetService("Stats").Network.ServerStatsItem["Data Ping"]:GetValue()
+    end)
+    return math.clamp(0.19 + (n2 / 1000) * 0.5, 0.05, 0.35)
 end
 
 local function AutoK1NGRun()
-	local Character = LocalPlayer.Character
-	if not Character then
-		Character = LocalPlayer.CharacterAdded:Wait()
-	end
-	local Humanoid = Character:WaitForChild("Humanoid")
-	local HumanoidRootPart = Character:WaitForChild("HumanoidRootPart")
-	local Animator = Humanoid:WaitForChild("Animator")
+    local Character = LocalPlayer.Character
+    if not Character then
+        Character = LocalPlayer.CharacterAdded:Wait()
+    end
+    local Humanoid = Character:WaitForChild("Humanoid")
+    local HumanoidRootPart = Character:WaitForChild("HumanoidRootPart")
+    local Animator = Humanoid:WaitForChild("Animator")
 
-	Animator.AnimationPlayed:Connect(function(track)
-		if not AutoK1NGEnabled or AutoK1NGInCooldown then return end
-		local anim = track.Animation
-		if not anim or anim.AnimationId ~= "rbxassetid://10503381238" then return end
-		AutoK1NGInCooldown = true
-		task.wait(0.35)
-		AutoK1NGInCooldown = false
-		pcall(function()
-			Humanoid:ChangeState(Enum.HumanoidStateType.Jumping)
-			HumanoidRootPart.Velocity = Vector3.new(HumanoidRootPart.Velocity.X, 60, HumanoidRootPart.Velocity.Z)
-			local Communicate = Character:FindFirstChild("Communicate")
-			if Communicate then
-				Communicate:FireServer({
-					Dash = Enum.KeyCode.W,
-					Key = Enum.KeyCode.Q,
-					Goal = "KeyPress"
-				})
-			end
-		end)
-		task.delay(AutoK1NGGetCooldown(), function()
-			local cam = workspace.CurrentCamera
-			if cam then
-				local cf = cam.CFrame
-				local look = cf.LookVector
-				local back = -Vector3.new(look.X, 0, look.Z)
-				if back.Magnitude > 0 then
-					back = back.Unit
-					cam.CFrame = CFrame.new(cf.Position, cf.Position + Vector3.new(back.X, look.Y, back.Z))
-				end
-			end
-		end)
-	end)
+    Animator.AnimationPlayed:Connect(function(track)
+        if not AutoK1NGEnabled or AutoK1NGInCooldown then return end
+        local anim = track.Animation
+        if not anim or anim.AnimationId ~= "rbxassetid://10503381238" then return end
+        AutoK1NGInCooldown = true
+        task.wait(0.35)
+        AutoK1NGInCooldown = false
+        pcall(function()
+            Humanoid:ChangeState(Enum.HumanoidStateType.Jumping)
+            HumanoidRootPart.Velocity = Vector3.new(HumanoidRootPart.Velocity.X, 60, HumanoidRootPart.Velocity.Z)
+            local Communicate = Character:FindFirstChild("Communicate")
+            if Communicate then
+                Communicate:FireServer({
+                    Dash = Enum.KeyCode.W,
+                    Key = Enum.KeyCode.Q,
+                    Goal = "KeyPress"
+                })
+            end
+        end)
+        task.delay(AutoK1NGGetCooldown(), function()
+            local cam = workspace.CurrentCamera
+            if cam then
+                local cf = cam.CFrame
+                local look = cf.LookVector
+                local back = -Vector3.new(look.X, 0, look.Z)
+                if back.Magnitude > 0 then
+                    back = back.Unit
+                    cam.CFrame = CFrame.new(cf.Position, cf.Position + Vector3.new(back.X, look.Y, back.Z))
+                end
+            end
+        end)
+    end)
 end
 
 task.spawn(AutoK1NGRun)
 LocalPlayer.CharacterAdded:Connect(function()
-	task.wait(1)
-	task.spawn(AutoK1NGRun)
+    task.wait(1)
+    task.spawn(AutoK1NGRun)
 end)
 
 AutoK1NGToggle.SetCallback(function(state)
-	AutoK1NGEnabled = state
+    AutoK1NGEnabled = state
 end)
 
 local LoopDashEnabled = false
@@ -2802,154 +2802,154 @@ local CurrentTarget = nil
 local DASH_ANIM = "rbxassetid://10503381238"
 
 local function getCharacter()
-	local char = LocalPlayer.Character
-	if not char then return nil, nil, nil, nil end
-	local humanoid = char:FindFirstChildOfClass("Humanoid")
-	local hrp = char:FindFirstChild("HumanoidRootPart")
-	local animator = humanoid and humanoid:FindFirstChildOfClass("Animator")
-	return char, humanoid, hrp, animator
+    local char = LocalPlayer.Character
+    if not char then return nil, nil, nil, nil end
+    local humanoid = char:FindFirstChildOfClass("Humanoid")
+    local hrp = char:FindFirstChild("HumanoidRootPart")
+    local animator = humanoid and humanoid:FindFirstChildOfClass("Animator")
+    return char, humanoid, hrp, animator
 end
 
 local function getClosestEnemy()
-	local _, _, myHRP = getCharacter()
-	if not myHRP then return nil end
-	local closest, shortest = nil, math.huge
-	for _, plr in ipairs(Players:GetPlayers()) do
-		if plr ~= LocalPlayer and plr.Character then
-			local hum = plr.Character:FindFirstChildOfClass("Humanoid")
-			local hrp = plr.Character:FindFirstChild("HumanoidRootPart")
-			if hum and hum.Health > 0 and hrp then
-				local dist = (myHRP.Position - hrp.Position).Magnitude
-				if dist < shortest then
-					shortest = dist
-					closest = hrp
-				end
-			end
-		end
-	end
-	return closest
+    local _, _, myHRP = getCharacter()
+    if not myHRP then return nil end
+    local closest, shortest = nil, math.huge
+    for _, plr in ipairs(Players:GetPlayers()) do
+        if plr ~= LocalPlayer and plr.Character then
+            local hum = plr.Character:FindFirstChildOfClass("Humanoid")
+            local hrp = plr.Character:FindFirstChild("HumanoidRootPart")
+            if hum and hum.Health > 0 and hrp then
+                local dist = (myHRP.Position - hrp.Position).Magnitude
+                if dist < shortest then
+                    shortest = dist
+                    closest = hrp
+                end
+            end
+        end
+    end
+    return closest
 end
 
 local function fireDash()
-	local char = LocalPlayer.Character
-	if not char then return end
-	local communicate = char:FindFirstChild("Communicate")
-	if not communicate then return end
-	pcall(function()
-		communicate:FireServer({
-			Dash = Enum.KeyCode.W,
-			Key = Enum.KeyCode.Q,
-			Goal = "KeyPress"
-		})
-	end)
+    local char = LocalPlayer.Character
+    if not char then return end
+    local communicate = char:FindFirstChild("Communicate")
+    if not communicate then return end
+    pcall(function()
+        communicate:FireServer({
+            Dash = Enum.KeyCode.W,
+            Key = Enum.KeyCode.Q,
+            Goal = "KeyPress"
+        })
+    end)
 end
 
 local function onAnimationPlayed(track)
-	if not LoopDashEnabled then return end
-	local anim = track.Animation
-	if not anim then return end
-	local id = tostring(anim.AnimationId or "")
-	if id ~= DASH_ANIM and not string.find(id, "10503381238") then return end
-	CurrentTarget = getClosestEnemy()
-	local renderConn
-	renderConn = RunService.RenderStepped:Connect(function()
-		if not LoopDashEnabled then
-			if renderConn then renderConn:Disconnect() end
-			return
-		end
-		local playing = false
-		pcall(function() playing = track.IsPlaying end)
-		if not playing then
-			local _, _, hrp = getCharacter()
-			if hrp then
-				pcall(function()
-					hrp.CFrame = hrp.CFrame - (hrp.CFrame.LookVector * 4.5)
-				end)
-			end
-			fireDash()
-			if renderConn then renderConn:Disconnect() end
-			return
-		end
-		local remaining = 999
-		pcall(function()
-			remaining = track.Length - track.TimePosition
-		end)
-		if remaining <= 0.3 then
-			local _, _, hrp = getCharacter()
-			if hrp then
-				pcall(function()
-					hrp.CFrame = hrp.CFrame - (hrp.CFrame.LookVector * 4.5)
-				end)
-			end
-			fireDash()
-		end
-	end)
-	task.delay(2.7, function()
-		if renderConn then
-			pcall(function() renderConn:Disconnect() end)
-		end
-	end)
+    if not LoopDashEnabled then return end
+    local anim = track.Animation
+    if not anim then return end
+    local id = tostring(anim.AnimationId or "")
+    if id ~= DASH_ANIM and not string.find(id, "10503381238") then return end
+    CurrentTarget = getClosestEnemy()
+    local renderConn
+    renderConn = RunService.RenderStepped:Connect(function()
+        if not LoopDashEnabled then
+            if renderConn then renderConn:Disconnect() end
+            return
+        end
+        local playing = false
+        pcall(function() playing = track.IsPlaying end)
+        if not playing then
+            local _, _, hrp = getCharacter()
+            if hrp then
+                pcall(function()
+                    hrp.CFrame = hrp.CFrame - (hrp.CFrame.LookVector * 4.5)
+                end)
+            end
+            fireDash()
+            if renderConn then renderConn:Disconnect() end
+            return
+        end
+        local remaining = 999
+        pcall(function()
+            remaining = track.Length - track.TimePosition
+        end)
+        if remaining <= 0.3 then
+            local _, _, hrp = getCharacter()
+            if hrp then
+                pcall(function()
+                    hrp.CFrame = hrp.CFrame - (hrp.CFrame.LookVector * 4.5)
+                end)
+            end
+            fireDash()
+        end
+    end)
+    task.delay(2.7, function()
+        if renderConn then
+            pcall(function() renderConn:Disconnect() end)
+        end
+    end)
 end
 
 local function startLoopDash()
-	local _, _, _, animator = getCharacter()
-	if not animator then return end
-	if AnimConnection then
-		pcall(function() AnimConnection:Disconnect() end)
-		AnimConnection = nil
-	end
-	if FaceConnection then
-		pcall(function() FaceConnection:Disconnect() end)
-		FaceConnection = nil
-	end
-	AnimConnection = animator.AnimationPlayed:Connect(onAnimationPlayed)
-	FaceConnection = RunService.RenderStepped:Connect(function()
-		if not LoopDashEnabled then return end
-		if not CurrentTarget or not CurrentTarget.Parent then return end
-		local _, _, myHRP = getCharacter()
-		if not myHRP then return end
-		local targetHum = CurrentTarget.Parent:FindFirstChildOfClass("Humanoid")
-		if targetHum and targetHum.Health > 0 then
-			pcall(function()
-				myHRP.CFrame = CFrame.lookAt(
-					myHRP.Position,
-					Vector3.new(CurrentTarget.Position.X, myHRP.Position.Y, CurrentTarget.Position.Z)
-				)
-				local cam = workspace.CurrentCamera
-				if cam then
-					cam.CFrame = CFrame.lookAt(cam.CFrame.Position, CurrentTarget.Position)
-				end
-			end)
-		end
-	end)
+    local _, _, _, animator = getCharacter()
+    if not animator then return end
+    if AnimConnection then
+        pcall(function() AnimConnection:Disconnect() end)
+        AnimConnection = nil
+    end
+    if FaceConnection then
+        pcall(function() FaceConnection:Disconnect() end)
+        FaceConnection = nil
+    end
+    AnimConnection = animator.AnimationPlayed:Connect(onAnimationPlayed)
+    FaceConnection = RunService.RenderStepped:Connect(function()
+        if not LoopDashEnabled then return end
+        if not CurrentTarget or not CurrentTarget.Parent then return end
+        local _, _, myHRP = getCharacter()
+        if not myHRP then return end
+        local targetHum = CurrentTarget.Parent:FindFirstChildOfClass("Humanoid")
+        if targetHum and targetHum.Health > 0 then
+            pcall(function()
+                myHRP.CFrame = CFrame.lookAt(
+                    myHRP.Position,
+                    Vector3.new(CurrentTarget.Position.X, myHRP.Position.Y, CurrentTarget.Position.Z)
+                )
+                local cam = workspace.CurrentCamera
+                if cam then
+                    cam.CFrame = CFrame.lookAt(cam.CFrame.Position, CurrentTarget.Position)
+                end
+            end)
+        end
+    end)
 end
 
 local function stopLoopDash()
-	if AnimConnection then
-		pcall(function() AnimConnection:Disconnect() end)
-		AnimConnection = nil
-	end
-	if FaceConnection then
-		pcall(function() FaceConnection:Disconnect() end)
-		FaceConnection = nil
-	end
-	CurrentTarget = nil
+    if AnimConnection then
+        pcall(function() AnimConnection:Disconnect() end)
+        AnimConnection = nil
+    end
+    if FaceConnection then
+        pcall(function() FaceConnection:Disconnect() end)
+        FaceConnection = nil
+    end
+    CurrentTarget = nil
 end
 
 AutoLoopDashToggle.SetCallback(function(state)
-	LoopDashEnabled = state
-	if state then
-		startLoopDash()
-	else
-		stopLoopDash()
-	end
+    LoopDashEnabled = state
+    if state then
+        startLoopDash()
+    else
+        stopLoopDash()
+    end
 end)
 
 LocalPlayer.CharacterAdded:Connect(function()
-	task.wait(1)
-	if LoopDashEnabled then
-		startLoopDash()
-	end
+    task.wait(1)
+    if LoopDashEnabled then
+        startLoopDash()
+    end
 end)
 
 
