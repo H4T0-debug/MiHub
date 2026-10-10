@@ -641,7 +641,7 @@ FixCameraPadding.PaddingLeft = UDim.new(0, 12)
 FixCameraPadding.Parent = FixCameraBtn
 local AimBotToggle = CreateToggle("AimBot", "Aim bot", "Locks camera to nearest enemy", 1, AimScroll)
 local AutoK1NGToggle = CreateToggle("AutoK1NG", "Auto K1NG", "Automatically performs K1NG tech on animation", 1, AutoTechsScroll)
-local AutoSupaToggle = CreateToggle("AutoSupa", "Auto Supa", "Attaches to nearest enemy during dash animation", 2, AutoTechsScroll)
+local AutoSupaToggle = CreateToggle("AutoSupa", "Auto Supa", "Automatically performs Supa tech on animation", 2, AutoTechsScroll)
 
 local RankedFarmToggle = CreateToggle("RankedFarm", "Ranked farm", "Farms ranked matches automatically", 1, RankedScroll)
 local AutoQueueToggle = CreateToggle("AutoQueue", "Auto queue", "Automatically queues the selected mode", 2, RankedScroll)
@@ -2588,7 +2588,6 @@ end)
 local AutoSupaEnabled = false
 local AutoSupaAttachment = nil
 local AutoSupaTargetCharacter = nil
-local AutoSupaDashAnim = "rbxassetid://10503381238"
 
 local function AutoSupaGetCharacter()
 local char = LocalPlayer.Character or LocalPlayer.CharacterAdded:Wait()
@@ -2649,7 +2648,7 @@ end
 local function AutoSupaOnAnimationPlayed(animTrack)
 if not AutoSupaEnabled then return end
 local anim = animTrack.Animation
-if not anim or anim.AnimationId ~= AutoSupaDashAnim then return end
+if not anim or anim.AnimationId ~= "rbxassetid://10503381238" then return end
 local target = AutoSupaGetClosestEnemy()
 if target then
 AutoSupaAttachToTarget(target)
