@@ -4,7 +4,6 @@ local TweenService = game:GetService("TweenService")
 local UserGameSettings = UserSettings():GetService("UserGameSettings")
 local RunService = game:GetService("RunService")
 local CoreGui = game:GetService("CoreGui")
-local Stats = game:GetService("Stats")
 local LocalPlayer = Players.LocalPlayer
 local ScreenGui = Instance.new("ScreenGui")
 ScreenGui.Name = "MiHubGui"
@@ -415,36 +414,6 @@ RankedList.SortOrder = Enum.SortOrder.LayoutOrder
 RankedList.Padding = UDim.new(0, 2)
 RankedList.Parent = RankedScroll
 
-local AutoTechsTab = Instance.new("ImageLabel")
-AutoTechsTab.Name = "AutoTechsTab"
-AutoTechsTab.Size = UDim2.new(1, 0, 1, 0)
-AutoTechsTab.BackgroundTransparency = 1
-AutoTechsTab.Image = "rbxassetid://6521912809"
-AutoTechsTab.ScaleType = Enum.ScaleType.Crop
-AutoTechsTab.Visible = false
-AutoTechsTab.ZIndex = 11
-AutoTechsTab.Parent = Container
-local AutoTechsScroll = Instance.new("ScrollingFrame")
-AutoTechsScroll.Name = "AutoTechsScroll"
-AutoTechsScroll.Size = UDim2.new(1, 0, 1, 0)
-AutoTechsScroll.BackgroundTransparency = 1
-AutoTechsScroll.BorderSizePixel = 0
-AutoTechsScroll.ScrollBarThickness = 4
-AutoTechsScroll.ScrollBarImageColor3 = Color3.fromRGB(255, 0, 40)
-AutoTechsScroll.CanvasSize = UDim2.new(0, 0, 0, 0)
-AutoTechsScroll.AutomaticCanvasSize = Enum.AutomaticSize.Y
-AutoTechsScroll.ZIndex = 11
-AutoTechsScroll.Parent = AutoTechsTab
-local AutoTechsPadding = Instance.new("UIPadding")
-AutoTechsPadding.PaddingTop = UDim.new(0, 10)
-AutoTechsPadding.PaddingLeft = UDim.new(0, 15)
-AutoTechsPadding.PaddingRight = UDim.new(0, 15)
-AutoTechsPadding.Parent = AutoTechsScroll
-local AutoTechsList = Instance.new("UIListLayout")
-AutoTechsList.SortOrder = Enum.SortOrder.LayoutOrder
-AutoTechsList.Padding = UDim.new(0, 2)
-AutoTechsList.Parent = AutoTechsScroll
-
 local ThemesTab = Instance.new("ImageLabel")
 ThemesTab.Name = "ThemesTab"
 ThemesTab.Size = UDim2.new(1, 0, 1, 0)
@@ -475,6 +444,9 @@ ThemesList.SortOrder = Enum.SortOrder.LayoutOrder
 ThemesList.Padding = UDim.new(0, 2)
 ThemesList.Parent = ThemesScroll
 
+-- ============================================================
+-- UPDATED CreateToggle: adds SetState() for programmatic toggling
+-- ============================================================
 local function CreateToggle(name, text, subtext, layoutOrder, parentFrame)
 parentFrame = parentFrame or AutoScroll
 local Frame = Instance.new("Frame")
@@ -563,7 +535,7 @@ SetState = function(state, fireCallback)
 if toggled == state then return end
 toggled = state
 applyVisual(toggled)
-if fireCallback \~= false and callback then
+if fireCallback ~= false and callback then
 callback(toggled)
 end
 end
@@ -640,12 +612,14 @@ local FixCameraPadding = Instance.new("UIPadding")
 FixCameraPadding.PaddingLeft = UDim.new(0, 12)
 FixCameraPadding.Parent = FixCameraBtn
 local AimBotToggle = CreateToggle("AimBot", "Aim bot", "Locks camera to nearest enemy", 1, AimScroll)
-local AutoSupaToggle = CreateToggle("AutoSupa", "Auto Supa", "Automatically performs Supa tech on animation", 1, AutoTechsScroll)
-local AutoLoopDashToggle = CreateToggle("AutoLoopDash", "Auto loop dash", "Loops dash towards nearest enemy", 2, AutoTechsScroll)
 
+-- ============================================================
+-- RANKED TAB: Ranked Farm + Auto Queue + Mode dropdown + Auto Ult
+-- ============================================================
 local RankedFarmToggle = CreateToggle("RankedFarm", "Ranked farm", "Farms ranked matches automatically", 1, RankedScroll)
 local AutoQueueToggle = CreateToggle("AutoQueue", "Auto queue", "Automatically queues the selected mode", 2, RankedScroll)
 
+-- Mode dropdown
 local RankedModeFrame = Instance.new("Frame")
 RankedModeFrame.Name = "RankedModeFrame"
 RankedModeFrame.Size = UDim2.new(1, 0, 0, 30)
@@ -783,6 +757,9 @@ end)
 
 local AutoUltToggle = CreateToggle("AutoUlt", "Auto ultimate", "Activates ultimate when fully charged", 4, RankedScroll)
 
+-- ============================================================
+-- THEMES (unchanged)
+-- ============================================================
 local ThemesFrame = Instance.new("Frame")
 ThemesFrame.Name = "ThemesFrame"
 ThemesFrame.Size = UDim2.new(1, 0, 0, 30)
@@ -861,7 +838,6 @@ AutoTab.Image = assetId
 MiscTab.Image = assetId
 AimTab.Image = assetId
 RankedTab.Image = assetId
-AutoTechsTab.Image = assetId
 ThemesTab.Image = assetId
 end
 
@@ -974,7 +950,7 @@ local character = player.Character or player.CharacterAdded:Wait()
 local function setInvisible(enabled)
 local transparency = enabled and 1 or 0
 for _, v in ipairs(character:GetDescendants()) do
-if v:IsA("BasePart") and v.Name \~= "HumanoidRootPart" then
+if v:IsA("BasePart") and v.Name ~= "HumanoidRootPart" then
 v.Transparency = transparency
 elseif v:IsA("Decal") or v:IsA("Texture") then
 v.Transparency = transparency
@@ -1060,7 +1036,7 @@ local myChar = LocalPlayer.Character
 if not myChar or not myChar:FindFirstChild("HumanoidRootPart") then return end
 local detectedDanger = false
 for _, plr in ipairs(Players:GetPlayers()) do
-if plr \~= LocalPlayer and plr.Character then
+if plr ~= LocalPlayer and plr.Character then
 local hum = plr.Character:FindFirstChildOfClass("Humanoid")
 local hrp = plr.Character:FindFirstChild("HumanoidRootPart")
 if hum and hrp then
@@ -1132,6 +1108,7 @@ task.wait(0.1)
 Camera.CameraType = Enum.CameraType.Custom
 plr.CameraMode = Enum.CameraMode.Classic
 until not dothetech
+task.wait(10)
 end
 end
 end
@@ -1141,39 +1118,267 @@ task.wait()
 end
 end)
 end
-BypassDeathCounterToggle.SetCallback(function(state)
+local function SetByPassCounter(state)
 ByPassCounterEnabled = state
 if state then
 StartByPassCounter()
-else
-if ByPassLoop then
-task.cancel(ByPassLoop)
-ByPassLoop = nil
 end
+end
+BypassDeathCounterToggle.SetCallback(function(state)
+SetByPassCounter(state)
+end)
+local function SetNoDashCD(state)
+if state then
+workspace:SetAttribute("EffectAffects", 1)
+workspace:SetAttribute("NoDashCooldown", true)
+else
+workspace:SetAttribute("EffectAffects", 0)
+workspace:SetAttribute("NoDashCooldown", false)
+end
+end
+NoDashCooldownToggle.SetCallback(function(state)
+SetNoDashCD(state)
+end)
+
+local InputFrame = Instance.new("Frame")
+InputFrame.Name = "InputFrame"
+InputFrame.Size = UDim2.new(1, 0, 0, 30)
+InputFrame.BackgroundTransparency = 1
+InputFrame.LayoutOrder = 3
+InputFrame.ZIndex = 12
+InputFrame.Parent = AutoScroll
+local InputLabel = Instance.new("TextLabel")
+InputLabel.Size = UDim2.new(0, 100, 1, 0)
+InputLabel.BackgroundTransparency = 1
+InputLabel.Text = "Lowest health:"
+InputLabel.TextColor3 = Color3.fromRGB(220, 220, 220)
+InputLabel.TextSize = 12
+InputLabel.Font = Enum.Font.GothamSemibold
+InputLabel.TextXAlignment = Enum.TextXAlignment.Left
+InputLabel.ZIndex = 13
+InputLabel.Parent = InputFrame
+local TextBox = Instance.new("TextBox")
+TextBox.Size = UDim2.new(0, 120, 0, 24)
+TextBox.Position = UDim2.new(0, 105, 0.5, -12)
+TextBox.BackgroundColor3 = Color3.fromRGB(28, 28, 35)
+TextBox.BorderSizePixel = 0
+TextBox.Text = "35"
+TextBox.PlaceholderText = "Amount..."
+TextBox.TextColor3 = Color3.fromRGB(255, 255, 255)
+TextBox.PlaceholderColor3 = Color3.fromRGB(120, 120, 120)
+TextBox.TextSize = 12
+TextBox.Font = Enum.Font.Gotham
+TextBox.ZIndex = 13
+TextBox.Parent = InputFrame
+local UICornerInput = Instance.new("UICorner")
+UICornerInput.CornerRadius = UDim.new(0, 5)
+UICornerInput.Parent = TextBox
+TextBox:GetPropertyChangedSignal("Text"):Connect(function()
+local text = TextBox.Text
+if text == "" then return end
+local cleaned = text:gsub("%D", "")
+if #cleaned > 2 then
+cleaned = cleaned:sub(1, 2)
+end
+local num = tonumber(cleaned)
+if num and num > 99 then
+cleaned = "99"
+end
+if TextBox.Text ~= cleaned then
+TextBox.Text = cleaned
+end
+end)
+local AutoTargetToggle = CreateToggle("AutoTarget", "Auto Kill Player", "Target a specific player by name", 4, AutoScroll)
+local TargetInputFrameAuto = Instance.new("Frame")
+TargetInputFrameAuto.Name = "TargetInputFrame"
+TargetInputFrameAuto.Size = UDim2.new(1, 0, 0, 30)
+TargetInputFrameAuto.BackgroundTransparency = 1
+TargetInputFrameAuto.LayoutOrder = 5
+TargetInputFrameAuto.ZIndex = 12
+TargetInputFrameAuto.Parent = AutoScroll
+local TargetLabelAuto = Instance.new("TextLabel")
+TargetLabelAuto.Size = UDim2.new(0, 100, 1, 0)
+TargetLabelAuto.BackgroundTransparency = 1
+TargetLabelAuto.Text = "Target player:"
+TargetLabelAuto.TextColor3 = Color3.fromRGB(220, 220, 220)
+TargetLabelAuto.TextSize = 12
+TargetLabelAuto.Font = Enum.Font.GothamSemibold
+TargetLabelAuto.TextXAlignment = Enum.TextXAlignment.Left
+TargetLabelAuto.ZIndex = 13
+TargetLabelAuto.Parent = TargetInputFrameAuto
+local TargetTextBoxAuto = Instance.new("TextBox")
+TargetTextBoxAuto.Size = UDim2.new(0, 120, 0, 24)
+TargetTextBoxAuto.Position = UDim2.new(0, 105, 0.5, -12)
+TargetTextBoxAuto.BackgroundColor3 = Color3.fromRGB(28, 28, 35)
+TargetTextBoxAuto.BorderSizePixel = 0
+TargetTextBoxAuto.Text = ""
+TargetTextBoxAuto.PlaceholderText = "Username/Display..."
+TargetTextBoxAuto.TextColor3 = Color3.fromRGB(255, 255, 255)
+TargetTextBoxAuto.PlaceholderColor3 = Color3.fromRGB(120, 120, 120)
+TargetTextBoxAuto.TextSize = 11
+TargetTextBoxAuto.Font = Enum.Font.Gotham
+TargetTextBoxAuto.ZIndex = 13
+TargetTextBoxAuto.Parent = TargetInputFrameAuto
+local UICornerTargetInputAuto = Instance.new("UICorner")
+UICornerTargetInputAuto.CornerRadius = UDim.new(0, 5)
+UICornerTargetInputAuto.Parent = TargetTextBoxAuto
+TargetTextBoxAuto.FocusLost:Connect(function()
+getgenv().TargetPlayerName = TargetTextBoxAuto.Text
+end)
+local ModeFrame = Instance.new("Frame")
+ModeFrame.Name = "ModeFrame"
+ModeFrame.Size = UDim2.new(1, 0, 0, 30)
+ModeFrame.BackgroundTransparency = 1
+ModeFrame.LayoutOrder = 6
+ModeFrame.ZIndex = 12
+ModeFrame.Parent = AutoScroll
+local ModeLabel = Instance.new("TextLabel")
+ModeLabel.Size = UDim2.new(0, 100, 1, 0)
+ModeLabel.BackgroundTransparency = 1
+ModeLabel.Text = "Mode:"
+ModeLabel.TextColor3 = Color3.fromRGB(220, 220, 220)
+ModeLabel.TextSize = 12
+ModeLabel.Font = Enum.Font.GothamSemibold
+ModeLabel.TextXAlignment = Enum.TextXAlignment.Left
+ModeLabel.ZIndex = 13
+ModeLabel.Parent = ModeFrame
+local ModeDropdownBtn = Instance.new("TextButton")
+ModeDropdownBtn.Name = "ModeDropdownBtn"
+ModeDropdownBtn.Size = UDim2.new(0, 120, 0, 24)
+ModeDropdownBtn.Position = UDim2.new(0, 105, 0.5, -12)
+ModeDropdownBtn.BackgroundColor3 = Color3.fromRGB(28, 28, 35)
+ModeDropdownBtn.BorderSizePixel = 0
+ModeDropdownBtn.Text = "Auto v"
+ModeDropdownBtn.TextColor3 = Color3.fromRGB(255, 255, 255)
+ModeDropdownBtn.TextSize = 12
+ModeDropdownBtn.Font = Enum.Font.Gotham
+ModeDropdownBtn.ZIndex = 13
+ModeDropdownBtn.Parent = ModeFrame
+local UICornerMode = Instance.new("UICorner")
+UICornerMode.CornerRadius = UDim.new(0, 5)
+UICornerMode.Parent = ModeDropdownBtn
+
+local ModeMenu = Instance.new("ScrollingFrame")
+ModeMenu.Name = "ModeMenu"
+ModeMenu.Size = UDim2.new(0, 120, 0, 0)
+ModeMenu.BackgroundColor3 = Color3.fromRGB(25, 25, 32)
+ModeMenu.BorderSizePixel = 0
+ModeMenu.Visible = false
+ModeMenu.ClipsDescendants = true
+ModeMenu.ScrollBarThickness = 3
+ModeMenu.ScrollBarImageColor3 = Color3.fromRGB(255, 0, 40)
+ModeMenu.CanvasSize = UDim2.new(0, 0, 0, 0)
+ModeMenu.AutomaticCanvasSize = Enum.AutomaticSize.Y
+ModeMenu.ZIndex = 100
+ModeMenu.Parent = ScreenGui
+local UICornerMenu = Instance.new("UICorner")
+UICornerMenu.CornerRadius = UDim.new(0, 5)
+UICornerMenu.Parent = ModeMenu
+local UIStrokeMenu = Instance.new("UIStroke")
+UIStrokeMenu.Thickness = 1
+UIStrokeMenu.Color = Color3.fromRGB(50, 50, 60)
+UIStrokeMenu.Parent = ModeMenu
+local UIListMenu = Instance.new("UIListLayout")
+UIListMenu.SortOrder = Enum.SortOrder.LayoutOrder
+UIListMenu.Padding = UDim.new(0, 2)
+UIListMenu.Parent = ModeMenu
+local UIPaddingMenu = Instance.new("UIPadding")
+UIPaddingMenu.PaddingTop = UDim.new(0, 2)
+UIPaddingMenu.PaddingBottom = UDim.new(0, 2)
+UIPaddingMenu.Parent = ModeMenu
+
+local AutoModeBtn = Instance.new("TextButton")
+AutoModeBtn.Size = UDim2.new(1, 0, 0, 24)
+AutoModeBtn.BackgroundTransparency = 1
+AutoModeBtn.Text = "Auto"
+AutoModeBtn.TextColor3 = Color3.fromRGB(255, 255, 255)
+AutoModeBtn.TextSize = 12
+AutoModeBtn.Font = Enum.Font.Gotham
+AutoModeBtn.ZIndex = 101
+AutoModeBtn.Parent = ModeMenu
+local ManualModeBtn = Instance.new("TextButton")
+ManualModeBtn.Size = UDim2.new(1, 0, 0, 24)
+ManualModeBtn.BackgroundTransparency = 1
+ManualModeBtn.Text = "Manual"
+ManualModeBtn.TextColor3 = Color3.fromRGB(255, 255, 255)
+ManualModeBtn.TextSize = 12
+ManualModeBtn.Font = Enum.Font.Gotham
+ManualModeBtn.ZIndex = 101
+ManualModeBtn.Parent = ModeMenu
+
+local ModeMenuOpen = false
+local ModeMenuTween = nil
+
+local function ToggleModeMenu()
+if ModeMenuTween then
+ModeMenuTween:Cancel()
+ModeMenuTween = nil
+end
+
+local absPos = ModeDropdownBtn.AbsolutePosition  
+local absSize = ModeDropdownBtn.AbsoluteSize  
+
+ModeMenu.Position = UDim2.new(0, absPos.X, 0, absPos.Y + absSize.Y + 2)  
+
+if ModeMenuOpen then  
+	ModeMenuOpen = false  
+	ModeMenuTween = TweenService:Create(ModeMenu, TweenInfo.new(0.18, Enum.EasingStyle.Quad, Enum.EasingDirection.In), {  
+		Size = UDim2.new(0, 120, 0, 0)  
+	})  
+	ModeMenuTween:Play()  
+	ModeMenuTween.Completed:Connect(function()  
+		if not ModeMenuOpen then  
+			ModeMenu.Visible = false  
+		end  
+	end)  
+else  
+	ModeMenuOpen = true  
+	ModeMenu.Visible = true  
+	ModeMenu.Size = UDim2.new(0, 120, 0, 0)  
+	ModeMenuTween = TweenService:Create(ModeMenu, TweenInfo.new(0.22, Enum.EasingStyle.Quad, Enum.EasingDirection.Out), {  
+		Size = UDim2.new(0, 120, 0, 56)  
+	})  
+	ModeMenuTween:Play()  
+end
+
+end
+
+ModeDropdownBtn.MouseButton1Click:Connect(function()
+ToggleModeMenu()
+end)
+
+AutoModeBtn.MouseButton1Click:Connect(function()
+getgenv().AutoKillMode = "Auto"
+ModeDropdownBtn.Text = "Auto v"
+if ModeMenuOpen then
+ToggleModeMenu()
+end
+end)
+ManualModeBtn.MouseButton1Click:Connect(function()
+getgenv().AutoKillMode = "Manual"
+ModeDropdownBtn.Text = "Manual v"
+if ModeMenuOpen then
+ToggleModeMenu()
 end
 end)
 
-local NoDashCooldownConnection = nil
-NoDashCooldownToggle.SetCallback(function(state)
-if NoDashCooldownConnection then
-NoDashCooldownConnection:Disconnect()
-NoDashCooldownConnection = nil
+UserInputService.InputBegan:Connect(function(input, gameProcessed)
+if gameProcessed then return end
+if ModeMenuOpen and (input.UserInputType == Enum.UserInputType.MouseButton1 or input.UserInputType == Enum.UserInputType.Touch) then
+local mousePos = UserInputService:GetMouseLocation()
+local menuPos = ModeMenu.AbsolutePosition
+local menuSize = ModeMenu.AbsoluteSize
+local btnPos = ModeDropdownBtn.AbsolutePosition
+local btnSize = ModeDropdownBtn.AbsoluteSize
+
+local insideMenu = mousePos.X >= menuPos.X and mousePos.X <= menuPos.X + menuSize.X and mousePos.Y >= menuPos.Y and mousePos.Y <= menuPos.Y + menuSize.Y  
+	local insideBtn = mousePos.X >= btnPos.X and mousePos.X <= btnPos.X + btnSize.X and mousePos.Y >= btnPos.Y and mousePos.Y <= btnPos.Y + btnSize.Y  
+
+	if not insideMenu and not insideBtn then  
+		ToggleModeMenu()  
+	end  
 end
-if state then
-NoDashCooldownConnection = RunService.Heartbeat:Connect(function()
-local char = LocalPlayer.Character
-if char then
-local hum = char:FindFirstChildOfClass("Humanoid")
-if hum then
-for _, track in ipairs(hum:GetPlayingAnimationTracks()) do
-if track.Animation and track.Animation.AnimationId == "rbxassetid://10503381238" then
-track:Stop()
-end
-end
-end
-end
-end)
-end
+
 end)
 
 local FPSTabBtn = Instance.new("TextButton")
@@ -1232,20 +1437,6 @@ RankedTabBtn.Parent = Sidebar
 local UICornerRankedTab = Instance.new("UICorner")
 UICornerRankedTab.CornerRadius = UDim.new(0, 5)
 UICornerRankedTab.Parent = RankedTabBtn
-local AutoTechsTabBtn = Instance.new("TextButton")
-AutoTechsTabBtn.Name = "AutoTechsTabBtn"
-AutoTechsTabBtn.Size = UDim2.new(1, 0, 0, 32)
-AutoTechsTabBtn.BackgroundColor3 = Color3.fromRGB(28, 28, 35)
-AutoTechsTabBtn.Text = "Auto Techs"
-AutoTechsTabBtn.TextColor3 = Color3.fromRGB(180, 180, 180)
-AutoTechsTabBtn.TextSize = 13
-AutoTechsTabBtn.Font = Enum.Font.GothamBold
-AutoTechsTabBtn.BorderSizePixel = 0
-AutoTechsTabBtn.ZIndex = 12
-AutoTechsTabBtn.Parent = Sidebar
-local UICornerAutoTechsTab = Instance.new("UICorner")
-UICornerAutoTechsTab.CornerRadius = UDim.new(0, 5)
-UICornerAutoTechsTab.Parent = AutoTechsTabBtn
 local ThemesTabBtn = Instance.new("TextButton")
 ThemesTabBtn.Name = "ThemesTabBtn"
 ThemesTabBtn.Size = UDim2.new(1, 0, 0, 32)
@@ -1282,7 +1473,6 @@ FPSTab.Visible = true
 AutoTab.Visible = false
 AimTab.Visible = false
 RankedTab.Visible = false
-AutoTechsTab.Visible = false
 ThemesTab.Visible = false
 MiscTab.Visible = false
 FPSTabBtn.BackgroundColor3 = Color3.fromRGB(35, 35, 45)
@@ -1293,8 +1483,6 @@ AimTabBtn.BackgroundColor3 = Color3.fromRGB(28, 28, 35)
 AimTabBtn.TextColor3 = Color3.fromRGB(180, 180, 180)
 RankedTabBtn.BackgroundColor3 = Color3.fromRGB(28, 28, 35)
 RankedTabBtn.TextColor3 = Color3.fromRGB(180, 180, 180)
-AutoTechsTabBtn.BackgroundColor3 = Color3.fromRGB(28, 28, 35)
-AutoTechsTabBtn.TextColor3 = Color3.fromRGB(180, 180, 180)
 ThemesTabBtn.BackgroundColor3 = Color3.fromRGB(28, 28, 35)
 ThemesTabBtn.TextColor3 = Color3.fromRGB(180, 180, 180)
 MiscTabBtn.BackgroundColor3 = Color3.fromRGB(28, 28, 35)
@@ -1308,7 +1496,6 @@ FPSTab.Visible = false
 AutoTab.Visible = true
 AimTab.Visible = false
 RankedTab.Visible = false
-AutoTechsTab.Visible = false
 ThemesTab.Visible = false
 MiscTab.Visible = false
 AutoTabBtn.BackgroundColor3 = Color3.fromRGB(35, 35, 45)
@@ -1319,8 +1506,6 @@ AimTabBtn.BackgroundColor3 = Color3.fromRGB(28, 28, 35)
 AimTabBtn.TextColor3 = Color3.fromRGB(180, 180, 180)
 RankedTabBtn.BackgroundColor3 = Color3.fromRGB(28, 28, 35)
 RankedTabBtn.TextColor3 = Color3.fromRGB(180, 180, 180)
-AutoTechsTabBtn.BackgroundColor3 = Color3.fromRGB(28, 28, 35)
-AutoTechsTabBtn.TextColor3 = Color3.fromRGB(180, 180, 180)
 ThemesTabBtn.BackgroundColor3 = Color3.fromRGB(28, 28, 35)
 ThemesTabBtn.TextColor3 = Color3.fromRGB(180, 180, 180)
 MiscTabBtn.BackgroundColor3 = Color3.fromRGB(28, 28, 35)
@@ -1334,7 +1519,6 @@ FPSTab.Visible = false
 AutoTab.Visible = false
 AimTab.Visible = true
 RankedTab.Visible = false
-AutoTechsTab.Visible = false
 ThemesTab.Visible = false
 MiscTab.Visible = false
 AimTabBtn.BackgroundColor3 = Color3.fromRGB(35, 35, 45)
@@ -1345,8 +1529,6 @@ AutoTabBtn.BackgroundColor3 = Color3.fromRGB(28, 28, 35)
 AutoTabBtn.TextColor3 = Color3.fromRGB(180, 180, 180)
 RankedTabBtn.BackgroundColor3 = Color3.fromRGB(28, 28, 35)
 RankedTabBtn.TextColor3 = Color3.fromRGB(180, 180, 180)
-AutoTechsTabBtn.BackgroundColor3 = Color3.fromRGB(28, 28, 35)
-AutoTechsTabBtn.TextColor3 = Color3.fromRGB(180, 180, 180)
 ThemesTabBtn.BackgroundColor3 = Color3.fromRGB(28, 28, 35)
 ThemesTabBtn.TextColor3 = Color3.fromRGB(180, 180, 180)
 MiscTabBtn.BackgroundColor3 = Color3.fromRGB(28, 28, 35)
@@ -1360,7 +1542,6 @@ FPSTab.Visible = false
 AutoTab.Visible = false
 AimTab.Visible = false
 RankedTab.Visible = true
-AutoTechsTab.Visible = false
 ThemesTab.Visible = false
 MiscTab.Visible = false
 RankedTabBtn.BackgroundColor3 = Color3.fromRGB(35, 35, 45)
@@ -1371,34 +1552,6 @@ AutoTabBtn.BackgroundColor3 = Color3.fromRGB(28, 28, 35)
 AutoTabBtn.TextColor3 = Color3.fromRGB(180, 180, 180)
 AimTabBtn.BackgroundColor3 = Color3.fromRGB(28, 28, 35)
 AimTabBtn.TextColor3 = Color3.fromRGB(180, 180, 180)
-AutoTechsTabBtn.BackgroundColor3 = Color3.fromRGB(28, 28, 35)
-AutoTechsTabBtn.TextColor3 = Color3.fromRGB(180, 180, 180)
-ThemesTabBtn.BackgroundColor3 = Color3.fromRGB(28, 28, 35)
-ThemesTabBtn.TextColor3 = Color3.fromRGB(180, 180, 180)
-MiscTabBtn.BackgroundColor3 = Color3.fromRGB(28, 28, 35)
-MiscTabBtn.TextColor3 = Color3.fromRGB(180, 180, 180)
-end)
-AutoTechsTabBtn.MouseButton1Click:Connect(function()
-if ModeMenuOpen then ToggleModeMenu() end
-if ThemesMenuOpen then ToggleThemesMenu() end
-if RankedModeOpen then ToggleRankedModeMenu() end
-FPSTab.Visible = false
-AutoTab.Visible = false
-AimTab.Visible = false
-RankedTab.Visible = false
-AutoTechsTab.Visible = true
-ThemesTab.Visible = false
-MiscTab.Visible = false
-AutoTechsTabBtn.BackgroundColor3 = Color3.fromRGB(35, 35, 45)
-AutoTechsTabBtn.TextColor3 = Color3.fromRGB(255, 0, 40)
-FPSTabBtn.BackgroundColor3 = Color3.fromRGB(28, 28, 35)
-FPSTabBtn.TextColor3 = Color3.fromRGB(180, 180, 180)
-AutoTabBtn.BackgroundColor3 = Color3.fromRGB(28, 28, 35)
-AutoTabBtn.TextColor3 = Color3.fromRGB(180, 180, 180)
-AimTabBtn.BackgroundColor3 = Color3.fromRGB(28, 28, 35)
-AimTabBtn.TextColor3 = Color3.fromRGB(180, 180, 180)
-RankedTabBtn.BackgroundColor3 = Color3.fromRGB(28, 28, 35)
-RankedTabBtn.TextColor3 = Color3.fromRGB(180, 180, 180)
 ThemesTabBtn.BackgroundColor3 = Color3.fromRGB(28, 28, 35)
 ThemesTabBtn.TextColor3 = Color3.fromRGB(180, 180, 180)
 MiscTabBtn.BackgroundColor3 = Color3.fromRGB(28, 28, 35)
@@ -1412,7 +1565,6 @@ FPSTab.Visible = false
 AutoTab.Visible = false
 AimTab.Visible = false
 RankedTab.Visible = false
-AutoTechsTab.Visible = false
 ThemesTab.Visible = true
 MiscTab.Visible = false
 ThemesTabBtn.BackgroundColor3 = Color3.fromRGB(35, 35, 45)
@@ -1425,8 +1577,6 @@ AimTabBtn.BackgroundColor3 = Color3.fromRGB(28, 28, 35)
 AimTabBtn.TextColor3 = Color3.fromRGB(180, 180, 180)
 RankedTabBtn.BackgroundColor3 = Color3.fromRGB(28, 28, 35)
 RankedTabBtn.TextColor3 = Color3.fromRGB(180, 180, 180)
-AutoTechsTabBtn.BackgroundColor3 = Color3.fromRGB(28, 28, 35)
-AutoTechsTabBtn.TextColor3 = Color3.fromRGB(180, 180, 180)
 MiscTabBtn.BackgroundColor3 = Color3.fromRGB(28, 28, 35)
 MiscTabBtn.TextColor3 = Color3.fromRGB(180, 180, 180)
 end)
@@ -1438,7 +1588,6 @@ FPSTab.Visible = false
 AutoTab.Visible = false
 AimTab.Visible = false
 RankedTab.Visible = false
-AutoTechsTab.Visible = false
 ThemesTab.Visible = false
 MiscTab.Visible = true
 MiscTabBtn.BackgroundColor3 = Color3.fromRGB(35, 35, 45)
@@ -1451,8 +1600,6 @@ AimTabBtn.BackgroundColor3 = Color3.fromRGB(28, 28, 35)
 AimTabBtn.TextColor3 = Color3.fromRGB(180, 180, 180)
 RankedTabBtn.BackgroundColor3 = Color3.fromRGB(28, 28, 35)
 RankedTabBtn.TextColor3 = Color3.fromRGB(180, 180, 180)
-AutoTechsTabBtn.BackgroundColor3 = Color3.fromRGB(28, 28, 35)
-AutoTechsTabBtn.TextColor3 = Color3.fromRGB(180, 180, 180)
 ThemesTabBtn.BackgroundColor3 = Color3.fromRGB(28, 28, 35)
 ThemesTabBtn.TextColor3 = Color3.fromRGB(180, 180, 180)
 end)
@@ -1546,7 +1693,7 @@ newMode = 1
 else
 newMode = 2
 end
-if newMode \~= lastMode then
+if newMode ~= lastMode then
 lastMode = newMode
 modeChangeCooldown = now
 if newMode == 0 then
@@ -1855,7 +2002,7 @@ local args2 = {[1] = {["Goal"] = "LeftClickRelease", ["Mobile"] = true}}
 game:GetService("Players").LocalPlayer.Character.Communicate:FireServer(unpack(args2))
 end)
 for _, x in pairs(game.Players.LocalPlayer.Backpack:GetChildren()) do
-if x:IsA("Tool") and x.Name \~= "Prey's Peril" and x.Name \~= "Split Second Counter" then
+if x:IsA("Tool") and x.Name ~= "Prey's Peril" and x.Name ~= "Split Second Counter" then
 game.Players.LocalPlayer.Character:WaitForChild("Humanoid"):EquipTool(x)
 x:Activate()
 game.Players.LocalPlayer.Character:WaitForChild("Humanoid"):UnequipTools()
@@ -1878,7 +2025,7 @@ end
 end
 end
 local function isPlayer(X)
-return game.Players:GetPlayerFromCharacter(X) \~= nil
+return game.Players:GetPlayerFromCharacter(X) ~= nil
 end
 local function FindNearest()
 local Dist = math.huge
@@ -1887,7 +2034,7 @@ for _, v in pairs(game.Workspace.Live:GetChildren()) do
 if isPlayer(v) then
 local Humanoid = v:FindFirstChildOfClass("Humanoid")
 local HumanoidRoot = v:FindFirstChild("HumanoidRootPart")
-if Humanoid and HumanoidRoot and v \~= LPlayer.Character then
+if Humanoid and HumanoidRoot and v ~= LPlayer.Character then
 if Humanoid.Health > 0 then
 local Mag = (CRoot.Position - HumanoidRoot.Position).Magnitude
 if Mag < Dist then
@@ -1936,7 +2083,7 @@ end
 end
 end
 local function isPlayer(X)
-return game.Players:GetPlayerFromCharacter(X) \~= nil
+return game.Players:GetPlayerFromCharacter(X) ~= nil
 end
 local function FindLowestHealth()
 local NearestPlr = nil
@@ -1945,7 +2092,7 @@ for _, v in pairs(game.Workspace.Live:GetChildren()) do
 if isPlayer(v) then
 local Humanoid = v:FindFirstChildOfClass("Humanoid")
 local HumanoidRoot = v:FindFirstChild("HumanoidRootPart")
-if Humanoid and HumanoidRoot and v \~= LPlayer.Character then
+if Humanoid and HumanoidRoot and v ~= LPlayer.Character then
 if Humanoid.Health > 0 and Humanoid.Health <= threshold then
 NearestPlr = HumanoidRoot
 end
@@ -1999,7 +2146,7 @@ local query = string.lower(getgenv().TargetPlayerName or "")
 if query == "" then return nil end
 for _, v in pairs(game.Workspace.Live:GetChildren()) do
 local plr = game.Players:GetPlayerFromCharacter(v)
-if plr and v \~= LPlayer.Character then
+if plr and v ~= LPlayer.Character then
 local nameMatch = string.lower(plr.Name):find(query, 1, true)
 local displayMatch = string.lower(plr.DisplayName):find(query, 1, true)
 if nameMatch or displayMatch then
@@ -2081,7 +2228,7 @@ end
 if character:FindFirstChild("TeammateHighlight") or character:FindFirstChild("AllyHighlight") or (character:FindFirstChildWhichIsA("Highlight") and character:FindFirstChildWhichIsA("Highlight").FillColor == Color3.fromRGB(0, 255, 0)) then
 return false
 end
-if player:GetAttribute("Team") == LocalPlayer:GetAttribute("Team") and player:GetAttribute("Team") \~= nil then
+if player:GetAttribute("Team") == LocalPlayer:GetAttribute("Team") and player:GetAttribute("Team") ~= nil then
 return false
 end
 if character:GetAttribute("IsTeammate") == true or character:GetAttribute("Ally") == true then
@@ -2108,7 +2255,7 @@ local Dist = math.huge
 local NearestPlr = nil
 for _, v in pairs(game.Workspace.Live:GetChildren()) do
 local plr = game.Players:GetPlayerFromCharacter(v)
-if plr and v \~= LPlayer.Character then
+if plr and v ~= LPlayer.Character then
 local Humanoid = v:FindFirstChildOfClass("Humanoid")
 local HumanoidRoot = v:FindFirstChild("HumanoidRootPart")
 if Humanoid and HumanoidRoot and Humanoid.Health > 0 then
@@ -2147,6 +2294,9 @@ UpdateCRoot()
 end)
 end
 
+-- ============================================================
+-- AUTO QUEUE SYSTEM
+-- ============================================================
 getgenv().AutoQueueEnabled = false
 getgenv().RankedQueueMode = "1v1"
 
@@ -2203,6 +2353,9 @@ AutoQueueThread = nil
 end)
 end
 
+-- ============================================================
+-- AUTO ULTIMATE SYSTEM
+-- ============================================================
 getgenv().AutoUltEnabled = false
 
 local function isUltFull()
@@ -2253,6 +2406,9 @@ end
 end)
 end
 
+-- ============================================================
+-- WIRE UP TOGGLES
+-- ============================================================
 AutoQueueToggle.SetCallback(function(state)
 getgenv().AutoQueueEnabled = state
 if state then
@@ -2276,248 +2432,14 @@ RankedFarmToggle.SetCallback(function(state)
 getgenv().RankedFarmEnabled = state
 if state then
 StartRankedFarm()
+-- Fully automatic: also enable auto queue + auto ultimate
 AutoQueueToggle.SetState(true)
 AutoUltToggle.SetState(true)
 else
+-- Turn off dependent systems when ranked farm is disabled
 AutoQueueToggle.SetState(false)
 AutoUltToggle.SetState(false)
 end
-end)
-
-local AutoSupaEnabled = false
-local AutoSupaCooldown = 0
-local AutoSupaInCooldown = false
-
-local function AutoSupaGetCooldown()
-local n2 = 0
-pcall(function()
-n2 = Stats.Network.ServerStatsItem["Data Ping"]:GetValue()
-end)
-local v39 = n2 / 1000
-return (math.clamp(0.19 + v39 * 0.5, 0.05, 0.35))
-end
-
-local function AutoSupaRun()
-local Character = LocalPlayer.Character
-if not Character then
-Character = LocalPlayer.CharacterAdded:Wait()
-end
-local Humanoid = Character:WaitForChild("Humanoid")
-local HumanoidRootPart = Character:WaitForChild("HumanoidRootPart")
-local Animator = Humanoid:WaitForChild("Animator")
-
-Animator.AnimationPlayed:Connect(function(animation)
-if not AutoSupaEnabled or AutoSupaInCooldown then
-return
-end
-local Animation = animation.Animation
-if Animation then
-Animation = animation.Animation.AnimationId
-end
-if Animation \~= "rbxassetid://10503381238" then
-return
-end
-AutoSupaInCooldown = true
-if AutoSupaCooldown > 0 then
-task.wait(AutoSupaCooldown)
-end
-AutoSupaInCooldown = false
-task.wait(0.35)
-Humanoid:ChangeState(Enum.HumanoidStateType.Jumping)
-HumanoidRootPart.Velocity = Vector3.new(HumanoidRootPart.Velocity.X, 60, HumanoidRootPart.Velocity.Z)
-local Communicate = Character:WaitForChild("Communicate")
-local W = Enum.KeyCode.W
-local Q = Enum.KeyCode.Q
-Communicate:FireServer({
-Dash = W,
-Key = Q,
-Goal = "KeyPress"
-})
-task.delay(AutoSupaGetCooldown(), function()
-local CurrentCamera = workspace.CurrentCamera
-if CurrentCamera then
-local CurrentCameraCFrame = CurrentCamera.CFrame
-local LookVector = CurrentCameraCFrame.LookVector
-local v61 = -Vector3.new(LookVector.X, 0, LookVector.Z).Unit
-local vector3 = Vector3.new(v61.X, LookVector.Y, v61.Z)
-CurrentCamera.CFrame = CFrame.new(CurrentCameraCFrame.Position, CurrentCameraCFrame.Position + vector3)
-end
-end)
-end)
-end
-
-AutoSupaRun()
-LocalPlayer.CharacterAdded:Connect(function()
-task.wait(1)
-AutoSupaRun()
-end)
-
-AutoSupaToggle.SetCallback(function(state)
-AutoSupaEnabled = state
-end)
-
-local LoopDashEnabled = false
-local AnimConnection = nil
-local FaceConnection = nil
-local CurrentTarget = nil
-
-local DASH_ANIM = "rbxassetid://10503381238"
-
-local function getCharacter()
-local char = LocalPlayer.Character
-if not char then return end
-local humanoid = char:FindFirstChildOfClass("Humanoid")
-local hrp = char:FindFirstChild("HumanoidRootPart")
-local animator = humanoid and humanoid:FindFirstChildOfClass("Animator")
-return char, humanoid, hrp, animator
-end
-
-local function getClosestEnemy()
-local _, _, myHRP = getCharacter()
-if not myHRP then return nil end
-
-local closest, shortest = nil, math.huge
-
-for _, plr in ipairs(Players:GetPlayers()) do
-if plr \~= LocalPlayer and plr.Character then
-local hum = plr.Character:FindFirstChildOfClass("Humanoid")
-local hrp = plr.Character:FindFirstChild("HumanoidRootPart")
-if hum and hum.Health > 0 and hrp then
-local dist = (myHRP.Position - hrp.Position).Magnitude
-if dist < shortest then
-shortest = dist
-closest = hrp
-end
-end
-end
-end
-
-return closest
-end
-
-local function fireDash()
-local char = LocalPlayer.Character
-if not char then return end
-
-local communicate = char:FindFirstChild("Communicate")
-if not communicate then return end
-
-pcall(function()
-communicate:FireServer({
-{
-Dash = Enum.KeyCode.W,
-Key = Enum.KeyCode.Q,
-Goal = "KeyPress",
-}
-})
-end)
-end
-
-local function onAnimationPlayed(track)
-if not LoopDashEnabled then return end
-
-local anim = track.Animation
-if not anim then return end
-if anim.AnimationId \~= DASH_ANIM and not anim.AnimationId:find("10503381238") then
-return
-end
-
-CurrentTarget = getClosestEnemy()
-
-local renderConn
-renderConn = RunService.RenderStepped:Connect(function()
-if not track.IsPlaying then
-local _, _, hrp = getCharacter()
-if hrp then
-hrp.CFrame = hrp.CFrame - (hrp.CFrame.LookVector * 4.5)
-end
-fireDash()
-renderConn:Disconnect()
-return
-end
-
-local remaining = track.Length - track.TimePosition
-if remaining <= 0.3 then
-local _, _, hrp = getCharacter()
-if hrp then
-hrp.CFrame = hrp.CFrame - (hrp.CFrame.LookVector * 4.5)
-end
-fireDash()
-end
-end)
-
-task.delay(2.7, function()
-if renderConn then
-renderConn:Disconnect()
-end
-end)
-end
-
-local function startLoopDash()
-local char, humanoid, hrp, animator = getCharacter()
-if not animator then return end
-
-if AnimConnection then
-AnimConnection:Disconnect()
-end
-if FaceConnection then
-FaceConnection:Disconnect()
-end
-
-AnimConnection = animator.AnimationPlayed:Connect(onAnimationPlayed)
-
-FaceConnection = RunService.RenderStepped:Connect(function()
-if not LoopDashEnabled then return end
-if not CurrentTarget or not CurrentTarget.Parent then return end
-
-local _, _, myHRP = getCharacter()
-if not myHRP then return end
-
-local targetHum = CurrentTarget.Parent:FindFirstChildOfClass("Humanoid")
-if targetHum and targetHum.Health > 0 then
-myHRP.CFrame = CFrame.lookAt(
-myHRP.Position,
-Vector3.new(CurrentTarget.Position.X, myHRP.Position.Y, CurrentTarget.Position.Z)
-)
-
-local cam = workspace.CurrentCamera
-if cam then
-cam.CFrame = CFrame.lookAt(cam.CFrame.Position, CurrentTarget.Position)
-end
-end
-end)
-end
-
-local function stopLoopDash()
-if AnimConnection then
-AnimConnection:Disconnect()
-AnimConnection = nil
-end
-if FaceConnection then
-FaceConnection:Disconnect()
-FaceConnection = nil
-end
-CurrentTarget = nil
-end
-
-function SetLoopDash(state)
-LoopDashEnabled = state
-if state then
-startLoopDash()
-else
-stopLoopDash()
-end
-end
-
-LocalPlayer.CharacterAdded:Connect(function()
-task.wait(1)
-if LoopDashEnabled then
-startLoopDash()
-end
-end)
-
-AutoLoopDashToggle.SetCallback(function(state)
-SetLoopDash(state)
 end)
 
 local CamlockState = false
@@ -2532,7 +2454,7 @@ game:GetService("GuiService"):GetScreenResolution().X / 2,
 game:GetService("GuiService"):GetScreenResolution().Y / 2
 )
 for _, Player in ipairs(Players:GetPlayers()) do
-if Player \~= LocalPlayer then
+if Player ~= LocalPlayer then
 local Character = Player.Character
 if Character and Character:FindFirstChild("HumanoidRootPart") and Character:FindFirstChildOfClass("Humanoid") and Character.Humanoid.Health > 0 then
 local Position, IsVisibleOnViewport =
@@ -2569,7 +2491,7 @@ if Locked then
 enemy = FindNearestEnemy()
 CamlockState = true
 else
-if enemy \~= nil then
+if enemy ~= nil then
 enemy = nil
 CamlockState = false
 end
