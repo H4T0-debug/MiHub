@@ -622,6 +622,7 @@ InvisibleSubtext.ZIndex = 12
 InvisibleSubtext.Parent = InvisibleSubtextFrame
 local AntiRagdollToggle = CreateToggle("AntiRagdoll", "Anti Ragdoll", "Prevents ragdoll state", 7, MiscScroll)
 local AntiStunToggle = CreateToggle("AntiStun", "Anti Stun", "Prevents stun effects", 8, MiscScroll)
+
 local AutoK1NGToggle = CreateToggle("AutoK1NG", "Auto K1NG", "Auto tech on dash animation", 1, AutoTechsScroll)
 local AutoLoopDashToggle = CreateToggle("AutoLoopDash", "Auto loop dash", "Loops dash towards nearest enemy", 2, AutoTechsScroll)
 local FixCameraBtn = Instance.new("TextButton")
@@ -1497,6 +1498,7 @@ MiscTabBtn.Parent = Sidebar
 local UICornerMiscTab = Instance.new("UICorner")
 UICornerMiscTab.CornerRadius = UDim.new(0, 5)
 UICornerMiscTab.Parent = MiscTabBtn
+
 local AutoTechsTabBtn = Instance.new("TextButton")
 AutoTechsTabBtn.Name = "AutoTechsTabBtn"
 AutoTechsTabBtn.Size = UDim2.new(1, 0, 0, 32)
@@ -2730,17 +2732,14 @@ end)
 
 
 local AutoK1NGEnabled = false
-local AutoK1NGCooldown = 0
 local AutoK1NGInCooldown = false
 
 local function AutoK1NGGetCooldown()
 	local n2 = 0
 	pcall(function()
-		local StatsService = game:GetService("Stats")
-		n2 = StatsService.Network.ServerStatsItem["Data Ping"]:GetValue()
+		n2 = game:GetService("Stats").Network.ServerStatsItem["Data Ping"]:GetValue()
 	end)
-	local v39 = n2 / 1000
-	return math.clamp(0.19 + v39 * 0.5, 0.05, 0.35)
+	return math.clamp(0.19 + (n2 / 1000) * 0.5, 0.05, 0.35)
 end
 
 local function AutoK1NGRun()
@@ -2752,21 +2751,13 @@ local function AutoK1NGRun()
 	local HumanoidRootPart = Character:WaitForChild("HumanoidRootPart")
 	local Animator = Humanoid:WaitForChild("Animator")
 
-	Animator.AnimationPlayed:Connect(function(animationTrack)
-		if not AutoK1NGEnabled or AutoK1NGInCooldown then
-			return
-		end
-		local anim = animationTrack.Animation
-		if not anim then return end
-		if anim.AnimationId ~= "rbxassetid://10503381238" then
-			return
-		end
+	Animator.AnimationPlayed:Connect(function(track)
+		if not AutoK1NGEnabled or AutoK1NGInCooldown then return end
+		local anim = track.Animation
+		if not anim or anim.AnimationId ~= "rbxassetid://10503381238" then return end
 		AutoK1NGInCooldown = true
-		if AutoK1NGCooldown > 0 then
-			task.wait(AutoK1NGCooldown)
-		end
-		AutoK1NGInCooldown = false
 		task.wait(0.35)
+		AutoK1NGInCooldown = false
 		pcall(function()
 			Humanoid:ChangeState(Enum.HumanoidStateType.Jumping)
 			HumanoidRootPart.Velocity = Vector3.new(HumanoidRootPart.Velocity.X, 60, HumanoidRootPart.Velocity.Z)
@@ -2780,15 +2771,14 @@ local function AutoK1NGRun()
 			end
 		end)
 		task.delay(AutoK1NGGetCooldown(), function()
-			local CurrentCamera = workspace.CurrentCamera
-			if CurrentCamera then
-				local CurrentCameraCFrame = CurrentCamera.CFrame
-				local LookVector = CurrentCameraCFrame.LookVector
-				local v61 = -Vector3.new(LookVector.X, 0, LookVector.Z)
-				if v61.Magnitude > 0 then
-					v61 = v61.Unit
-					local vector3 = Vector3.new(v61.X, LookVector.Y, v61.Z)
-					CurrentCamera.CFrame = CFrame.new(CurrentCameraCFrame.Position, CurrentCameraCFrame.Position + vector3)
+			local cam = workspace.CurrentCamera
+			if cam then
+				local cf = cam.CFrame
+				local look = cf.LookVector
+				local back = -Vector3.new(look.X, 0, look.Z)
+				if back.Magnitude > 0 then
+					back = back.Unit
+					cam.CFrame = CFrame.new(cf.Position, cf.Position + Vector3.new(back.X, look.Y, back.Z))
 				end
 			end
 		end)
@@ -2859,9 +2849,7 @@ local function onAnimationPlayed(track)
 	local anim = track.Animation
 	if not anim then return end
 	local id = tostring(anim.AnimationId or "")
-	if id ~= DASH_ANIM and not string.find(id, "10503381238") then
-		return
-	end
+	if id ~= DASH_ANIM and not string.find(id, "10503381238") then return end
 	CurrentTarget = getClosestEnemy()
 	local renderConn
 	renderConn = RunService.RenderStepped:Connect(function()
@@ -2904,7 +2892,7 @@ local function onAnimationPlayed(track)
 end
 
 local function startLoopDash()
-	local char, humanoid, hrp, animator = getCharacter()
+	local _, _, _, animator = getCharacter()
 	if not animator then return end
 	if AnimConnection then
 		pcall(function() AnimConnection:Disconnect() end)
@@ -2948,24 +2936,20 @@ local function stopLoopDash()
 	CurrentTarget = nil
 end
 
-local function SetLoopDash(state)
+AutoLoopDashToggle.SetCallback(function(state)
 	LoopDashEnabled = state
 	if state then
 		startLoopDash()
 	else
 		stopLoopDash()
 	end
-end
+end)
 
 LocalPlayer.CharacterAdded:Connect(function()
 	task.wait(1)
 	if LoopDashEnabled then
 		startLoopDash()
 	end
-end)
-
-AutoLoopDashToggle.SetCallback(function(state)
-	SetLoopDash(state)
 end)
 
 
