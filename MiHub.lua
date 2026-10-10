@@ -4,7 +4,6 @@ local TweenService = game:GetService("TweenService")
 local UserGameSettings = UserSettings():GetService("UserGameSettings")
 local RunService = game:GetService("RunService")
 local CoreGui = game:GetService("CoreGui")
-local Stats = game:GetService("Stats")
 local LocalPlayer = Players.LocalPlayer
 local ScreenGui = Instance.new("ScreenGui")
 ScreenGui.Name = "MiHubGui"
@@ -355,6 +354,37 @@ local MiscList = Instance.new("UIListLayout")
 MiscList.SortOrder = Enum.SortOrder.LayoutOrder
 MiscList.Padding = UDim.new(0, 2)
 MiscList.Parent = MiscScroll
+
+local AutoTechsTab = Instance.new("ImageLabel")
+AutoTechsTab.Name = "AutoTechsTab"
+AutoTechsTab.Size = UDim2.new(1, 0, 1, 0)
+AutoTechsTab.BackgroundTransparency = 1
+AutoTechsTab.Image = "rbxassetid://6521912809"
+AutoTechsTab.ScaleType = Enum.ScaleType.Crop
+AutoTechsTab.Visible = false
+AutoTechsTab.ZIndex = 11
+AutoTechsTab.Parent = Container
+local AutoTechsScroll = Instance.new("ScrollingFrame")
+AutoTechsScroll.Name = "AutoTechsScroll"
+AutoTechsScroll.Size = UDim2.new(1, 0, 1, 0)
+AutoTechsScroll.BackgroundTransparency = 1
+AutoTechsScroll.BorderSizePixel = 0
+AutoTechsScroll.ScrollBarThickness = 4
+AutoTechsScroll.ScrollBarImageColor3 = Color3.fromRGB(255, 0, 40)
+AutoTechsScroll.CanvasSize = UDim2.new(0, 0, 0, 0)
+AutoTechsScroll.AutomaticCanvasSize = Enum.AutomaticSize.Y
+AutoTechsScroll.ZIndex = 11
+AutoTechsScroll.Parent = AutoTechsTab
+local AutoTechsPadding = Instance.new("UIPadding")
+AutoTechsPadding.PaddingTop = UDim.new(0, 10)
+AutoTechsPadding.PaddingLeft = UDim.new(0, 15)
+AutoTechsPadding.PaddingRight = UDim.new(0, 15)
+AutoTechsPadding.Parent = AutoTechsScroll
+local AutoTechsList = Instance.new("UIListLayout")
+AutoTechsList.SortOrder = Enum.SortOrder.LayoutOrder
+AutoTechsList.Padding = UDim.new(0, 2)
+AutoTechsList.Parent = AutoTechsScroll
+
 local AimTab = Instance.new("ImageLabel")
 AimTab.Name = "AimTab"
 AimTab.Size = UDim2.new(1, 0, 1, 0)
@@ -414,36 +444,6 @@ local RankedList = Instance.new("UIListLayout")
 RankedList.SortOrder = Enum.SortOrder.LayoutOrder
 RankedList.Padding = UDim.new(0, 2)
 RankedList.Parent = RankedScroll
-
-local AutoTechsTab = Instance.new("ImageLabel")
-AutoTechsTab.Name = "AutoTechsTab"
-AutoTechsTab.Size = UDim2.new(1, 0, 1, 0)
-AutoTechsTab.BackgroundTransparency = 1
-AutoTechsTab.Image = "rbxassetid://6521912809"
-AutoTechsTab.ScaleType = Enum.ScaleType.Crop
-AutoTechsTab.Visible = false
-AutoTechsTab.ZIndex = 11
-AutoTechsTab.Parent = Container
-local AutoTechsScroll = Instance.new("ScrollingFrame")
-AutoTechsScroll.Name = "AutoTechsScroll"
-AutoTechsScroll.Size = UDim2.new(1, 0, 1, 0)
-AutoTechsScroll.BackgroundTransparency = 1
-AutoTechsScroll.BorderSizePixel = 0
-AutoTechsScroll.ScrollBarThickness = 4
-AutoTechsScroll.ScrollBarImageColor3 = Color3.fromRGB(255, 0, 40)
-AutoTechsScroll.CanvasSize = UDim2.new(0, 0, 0, 0)
-AutoTechsScroll.AutomaticCanvasSize = Enum.AutomaticSize.Y
-AutoTechsScroll.ZIndex = 11
-AutoTechsScroll.Parent = AutoTechsTab
-local AutoTechsPadding = Instance.new("UIPadding")
-AutoTechsPadding.PaddingTop = UDim.new(0, 10)
-AutoTechsPadding.PaddingLeft = UDim.new(0, 15)
-AutoTechsPadding.PaddingRight = UDim.new(0, 15)
-AutoTechsPadding.Parent = AutoTechsScroll
-local AutoTechsList = Instance.new("UIListLayout")
-AutoTechsList.SortOrder = Enum.SortOrder.LayoutOrder
-AutoTechsList.Padding = UDim.new(0, 2)
-AutoTechsList.Parent = AutoTechsScroll
 
 local ThemesTab = Instance.new("ImageLabel")
 ThemesTab.Name = "ThemesTab"
@@ -640,8 +640,8 @@ local FixCameraPadding = Instance.new("UIPadding")
 FixCameraPadding.PaddingLeft = UDim.new(0, 12)
 FixCameraPadding.Parent = FixCameraBtn
 local AimBotToggle = CreateToggle("AimBot", "Aim bot", "Locks camera to nearest enemy", 1, AimScroll)
-local AutoSupaToggle = CreateToggle("AutoSupa", "Auto K1NG", "Automatically performs Supa tech on animation", 1, AutoTechsScroll)
-local AutoSupaNewToggle = CreateToggle("AutoSupaNew", "Auto Supa", "Attaches to closest enemy on dash", 2, AutoTechsScroll)
+local AutoK1ngToggle = CreateToggle("AutoK1ng", "Auto K1NG tech", "Automatically performs K1NG tech", 1, AutoTechsScroll)
+local AutoSupaToggle = CreateToggle("AutoSupa", "Auto Supa", "Automatically performs Supa tech", 2, AutoTechsScroll)
 
 local RankedFarmToggle = CreateToggle("RankedFarm", "Ranked farm", "Farms ranked matches automatically", 1, RankedScroll)
 local AutoQueueToggle = CreateToggle("AutoQueue", "Auto queue", "Automatically queues the selected mode", 2, RankedScroll)
@@ -861,8 +861,8 @@ AutoTab.Image = assetId
 MiscTab.Image = assetId
 AimTab.Image = assetId
 RankedTab.Image = assetId
-AutoTechsTab.Image = assetId
 ThemesTab.Image = assetId
+AutoTechsTab.Image = assetId
 end
 
 local function ToggleThemesMenu()
@@ -1461,20 +1461,6 @@ RankedTabBtn.Parent = Sidebar
 local UICornerRankedTab = Instance.new("UICorner")
 UICornerRankedTab.CornerRadius = UDim.new(0, 5)
 UICornerRankedTab.Parent = RankedTabBtn
-local AutoTechsTabBtn = Instance.new("TextButton")
-AutoTechsTabBtn.Name = "AutoTechsTabBtn"
-AutoTechsTabBtn.Size = UDim2.new(1, 0, 0, 32)
-AutoTechsTabBtn.BackgroundColor3 = Color3.fromRGB(28, 28, 35)
-AutoTechsTabBtn.Text = "Auto Techs"
-AutoTechsTabBtn.TextColor3 = Color3.fromRGB(180, 180, 180)
-AutoTechsTabBtn.TextSize = 13
-AutoTechsTabBtn.Font = Enum.Font.GothamBold
-AutoTechsTabBtn.BorderSizePixel = 0
-AutoTechsTabBtn.ZIndex = 12
-AutoTechsTabBtn.Parent = Sidebar
-local UICornerAutoTechsTab = Instance.new("UICorner")
-UICornerAutoTechsTab.CornerRadius = UDim.new(0, 5)
-UICornerAutoTechsTab.Parent = AutoTechsTabBtn
 local ThemesTabBtn = Instance.new("TextButton")
 ThemesTabBtn.Name = "ThemesTabBtn"
 ThemesTabBtn.Size = UDim2.new(1, 0, 0, 32)
@@ -1503,6 +1489,20 @@ MiscTabBtn.Parent = Sidebar
 local UICornerMiscTab = Instance.new("UICorner")
 UICornerMiscTab.CornerRadius = UDim.new(0, 5)
 UICornerMiscTab.Parent = MiscTabBtn
+local AutoTechsTabBtn = Instance.new("TextButton")
+AutoTechsTabBtn.Name = "AutoTechsTabBtn"
+AutoTechsTabBtn.Size = UDim2.new(1, 0, 0, 32)
+AutoTechsTabBtn.BackgroundColor3 = Color3.fromRGB(28, 28, 35)
+AutoTechsTabBtn.Text = "Auto Techs"
+AutoTechsTabBtn.TextColor3 = Color3.fromRGB(180, 180, 180)
+AutoTechsTabBtn.TextSize = 13
+AutoTechsTabBtn.Font = Enum.Font.GothamBold
+AutoTechsTabBtn.BorderSizePixel = 0
+AutoTechsTabBtn.ZIndex = 12
+AutoTechsTabBtn.Parent = Sidebar
+local UICornerAutoTechsTab = Instance.new("UICorner")
+UICornerAutoTechsTab.CornerRadius = UDim.new(0, 5)
+UICornerAutoTechsTab.Parent = AutoTechsTabBtn
 FPSTabBtn.MouseButton1Click:Connect(function()
 if ModeMenuOpen then ToggleModeMenu() end
 if ThemesMenuOpen then ToggleThemesMenu() end
@@ -1511,9 +1511,9 @@ FPSTab.Visible = true
 AutoTab.Visible = false
 AimTab.Visible = false
 RankedTab.Visible = false
-AutoTechsTab.Visible = false
 ThemesTab.Visible = false
 MiscTab.Visible = false
+AutoTechsTab.Visible = false
 FPSTabBtn.BackgroundColor3 = Color3.fromRGB(35, 35, 45)
 FPSTabBtn.TextColor3 = Color3.fromRGB(255, 0, 40)
 AutoTabBtn.BackgroundColor3 = Color3.fromRGB(28, 28, 35)
@@ -1522,12 +1522,12 @@ AimTabBtn.BackgroundColor3 = Color3.fromRGB(28, 28, 35)
 AimTabBtn.TextColor3 = Color3.fromRGB(180, 180, 180)
 RankedTabBtn.BackgroundColor3 = Color3.fromRGB(28, 28, 35)
 RankedTabBtn.TextColor3 = Color3.fromRGB(180, 180, 180)
-AutoTechsTabBtn.BackgroundColor3 = Color3.fromRGB(28, 28, 35)
-AutoTechsTabBtn.TextColor3 = Color3.fromRGB(180, 180, 180)
 ThemesTabBtn.BackgroundColor3 = Color3.fromRGB(28, 28, 35)
 ThemesTabBtn.TextColor3 = Color3.fromRGB(180, 180, 180)
 MiscTabBtn.BackgroundColor3 = Color3.fromRGB(28, 28, 35)
 MiscTabBtn.TextColor3 = Color3.fromRGB(180, 180, 180)
+AutoTechsTabBtn.BackgroundColor3 = Color3.fromRGB(28, 28, 35)
+AutoTechsTabBtn.TextColor3 = Color3.fromRGB(180, 180, 180)
 end)
 AutoTabBtn.MouseButton1Click:Connect(function()
 if ModeMenuOpen then ToggleModeMenu() end
@@ -1537,9 +1537,9 @@ FPSTab.Visible = false
 AutoTab.Visible = true
 AimTab.Visible = false
 RankedTab.Visible = false
-AutoTechsTab.Visible = false
 ThemesTab.Visible = false
 MiscTab.Visible = false
+AutoTechsTab.Visible = false
 AutoTabBtn.BackgroundColor3 = Color3.fromRGB(35, 35, 45)
 AutoTabBtn.TextColor3 = Color3.fromRGB(255, 0, 40)
 FPSTabBtn.BackgroundColor3 = Color3.fromRGB(28, 28, 35)
@@ -1548,12 +1548,12 @@ AimTabBtn.BackgroundColor3 = Color3.fromRGB(28, 28, 35)
 AimTabBtn.TextColor3 = Color3.fromRGB(180, 180, 180)
 RankedTabBtn.BackgroundColor3 = Color3.fromRGB(28, 28, 35)
 RankedTabBtn.TextColor3 = Color3.fromRGB(180, 180, 180)
-AutoTechsTabBtn.BackgroundColor3 = Color3.fromRGB(28, 28, 35)
-AutoTechsTabBtn.TextColor3 = Color3.fromRGB(180, 180, 180)
 ThemesTabBtn.BackgroundColor3 = Color3.fromRGB(28, 28, 35)
 ThemesTabBtn.TextColor3 = Color3.fromRGB(180, 180, 180)
 MiscTabBtn.BackgroundColor3 = Color3.fromRGB(28, 28, 35)
 MiscTabBtn.TextColor3 = Color3.fromRGB(180, 180, 180)
+AutoTechsTabBtn.BackgroundColor3 = Color3.fromRGB(28, 28, 35)
+AutoTechsTabBtn.TextColor3 = Color3.fromRGB(180, 180, 180)
 end)
 AimTabBtn.MouseButton1Click:Connect(function()
 if ModeMenuOpen then ToggleModeMenu() end
@@ -1563,9 +1563,9 @@ FPSTab.Visible = false
 AutoTab.Visible = false
 AimTab.Visible = true
 RankedTab.Visible = false
-AutoTechsTab.Visible = false
 ThemesTab.Visible = false
 MiscTab.Visible = false
+AutoTechsTab.Visible = false
 AimTabBtn.BackgroundColor3 = Color3.fromRGB(35, 35, 45)
 AimTabBtn.TextColor3 = Color3.fromRGB(255, 0, 40)
 FPSTabBtn.BackgroundColor3 = Color3.fromRGB(28, 28, 35)
@@ -1574,12 +1574,12 @@ AutoTabBtn.BackgroundColor3 = Color3.fromRGB(28, 28, 35)
 AutoTabBtn.TextColor3 = Color3.fromRGB(180, 180, 180)
 RankedTabBtn.BackgroundColor3 = Color3.fromRGB(28, 28, 35)
 RankedTabBtn.TextColor3 = Color3.fromRGB(180, 180, 180)
-AutoTechsTabBtn.BackgroundColor3 = Color3.fromRGB(28, 28, 35)
-AutoTechsTabBtn.TextColor3 = Color3.fromRGB(180, 180, 180)
 ThemesTabBtn.BackgroundColor3 = Color3.fromRGB(28, 28, 35)
 ThemesTabBtn.TextColor3 = Color3.fromRGB(180, 180, 180)
 MiscTabBtn.BackgroundColor3 = Color3.fromRGB(28, 28, 35)
 MiscTabBtn.TextColor3 = Color3.fromRGB(180, 180, 180)
+AutoTechsTabBtn.BackgroundColor3 = Color3.fromRGB(28, 28, 35)
+AutoTechsTabBtn.TextColor3 = Color3.fromRGB(180, 180, 180)
 end)
 RankedTabBtn.MouseButton1Click:Connect(function()
 if ModeMenuOpen then ToggleModeMenu() end
@@ -1589,9 +1589,9 @@ FPSTab.Visible = false
 AutoTab.Visible = false
 AimTab.Visible = false
 RankedTab.Visible = true
-AutoTechsTab.Visible = false
 ThemesTab.Visible = false
 MiscTab.Visible = false
+AutoTechsTab.Visible = false
 RankedTabBtn.BackgroundColor3 = Color3.fromRGB(35, 35, 45)
 RankedTabBtn.TextColor3 = Color3.fromRGB(255, 0, 40)
 FPSTabBtn.BackgroundColor3 = Color3.fromRGB(28, 28, 35)
@@ -1600,12 +1600,64 @@ AutoTabBtn.BackgroundColor3 = Color3.fromRGB(28, 28, 35)
 AutoTabBtn.TextColor3 = Color3.fromRGB(180, 180, 180)
 AimTabBtn.BackgroundColor3 = Color3.fromRGB(28, 28, 35)
 AimTabBtn.TextColor3 = Color3.fromRGB(180, 180, 180)
-AutoTechsTabBtn.BackgroundColor3 = Color3.fromRGB(28, 28, 35)
-AutoTechsTabBtn.TextColor3 = Color3.fromRGB(180, 180, 180)
 ThemesTabBtn.BackgroundColor3 = Color3.fromRGB(28, 28, 35)
 ThemesTabBtn.TextColor3 = Color3.fromRGB(180, 180, 180)
 MiscTabBtn.BackgroundColor3 = Color3.fromRGB(28, 28, 35)
 MiscTabBtn.TextColor3 = Color3.fromRGB(180, 180, 180)
+AutoTechsTabBtn.BackgroundColor3 = Color3.fromRGB(28, 28, 35)
+AutoTechsTabBtn.TextColor3 = Color3.fromRGB(180, 180, 180)
+end)
+ThemesTabBtn.MouseButton1Click:Connect(function()
+if ModeMenuOpen then ToggleModeMenu() end
+if ThemesMenuOpen then ToggleThemesMenu() end
+if RankedModeOpen then ToggleRankedModeMenu() end
+FPSTab.Visible = false
+AutoTab.Visible = false
+AimTab.Visible = false
+RankedTab.Visible = false
+ThemesTab.Visible = true
+MiscTab.Visible = false
+AutoTechsTab.Visible = false
+ThemesTabBtn.BackgroundColor3 = Color3.fromRGB(35, 35, 45)
+ThemesTabBtn.TextColor3 = Color3.fromRGB(255, 0, 40)
+FPSTabBtn.BackgroundColor3 = Color3.fromRGB(28, 28, 35)
+FPSTabBtn.TextColor3 = Color3.fromRGB(180, 180, 180)
+AutoTabBtn.BackgroundColor3 = Color3.fromRGB(28, 28, 35)
+AutoTabBtn.TextColor3 = Color3.fromRGB(180, 180, 180)
+AimTabBtn.BackgroundColor3 = Color3.fromRGB(28, 28, 35)
+AimTabBtn.TextColor3 = Color3.fromRGB(180, 180, 180)
+RankedTabBtn.BackgroundColor3 = Color3.fromRGB(28, 28, 35)
+RankedTabBtn.TextColor3 = Color3.fromRGB(180, 180, 180)
+MiscTabBtn.BackgroundColor3 = Color3.fromRGB(28, 28, 35)
+MiscTabBtn.TextColor3 = Color3.fromRGB(180, 180, 180)
+AutoTechsTabBtn.BackgroundColor3 = Color3.fromRGB(28, 28, 35)
+AutoTechsTabBtn.TextColor3 = Color3.fromRGB(180, 180, 180)
+end)
+MiscTabBtn.MouseButton1Click:Connect(function()
+if ModeMenuOpen then ToggleModeMenu() end
+if ThemesMenuOpen then ToggleThemesMenu() end
+if RankedModeOpen then ToggleRankedModeMenu() end
+FPSTab.Visible = false
+AutoTab.Visible = false
+AimTab.Visible = false
+RankedTab.Visible = false
+ThemesTab.Visible = false
+MiscTab.Visible = true
+AutoTechsTab.Visible = false
+MiscTabBtn.BackgroundColor3 = Color3.fromRGB(35, 35, 45)
+MiscTabBtn.TextColor3 = Color3.fromRGB(255, 0, 40)
+FPSTabBtn.BackgroundColor3 = Color3.fromRGB(28, 28, 35)
+FPSTabBtn.TextColor3 = Color3.fromRGB(180, 180, 180)
+AutoTabBtn.BackgroundColor3 = Color3.fromRGB(28, 28, 35)
+AutoTabBtn.TextColor3 = Color3.fromRGB(180, 180, 180)
+AimTabBtn.BackgroundColor3 = Color3.fromRGB(28, 28, 35)
+AimTabBtn.TextColor3 = Color3.fromRGB(180, 180, 180)
+RankedTabBtn.BackgroundColor3 = Color3.fromRGB(28, 28, 35)
+RankedTabBtn.TextColor3 = Color3.fromRGB(180, 180, 180)
+ThemesTabBtn.BackgroundColor3 = Color3.fromRGB(28, 28, 35)
+ThemesTabBtn.TextColor3 = Color3.fromRGB(180, 180, 180)
+AutoTechsTabBtn.BackgroundColor3 = Color3.fromRGB(28, 28, 35)
+AutoTechsTabBtn.TextColor3 = Color3.fromRGB(180, 180, 180)
 end)
 AutoTechsTabBtn.MouseButton1Click:Connect(function()
 if ModeMenuOpen then ToggleModeMenu() end
@@ -1615,9 +1667,9 @@ FPSTab.Visible = false
 AutoTab.Visible = false
 AimTab.Visible = false
 RankedTab.Visible = false
-AutoTechsTab.Visible = true
 ThemesTab.Visible = false
 MiscTab.Visible = false
+AutoTechsTab.Visible = true
 AutoTechsTabBtn.BackgroundColor3 = Color3.fromRGB(35, 35, 45)
 AutoTechsTabBtn.TextColor3 = Color3.fromRGB(255, 0, 40)
 FPSTabBtn.BackgroundColor3 = Color3.fromRGB(28, 28, 35)
@@ -1632,58 +1684,6 @@ ThemesTabBtn.BackgroundColor3 = Color3.fromRGB(28, 28, 35)
 ThemesTabBtn.TextColor3 = Color3.fromRGB(180, 180, 180)
 MiscTabBtn.BackgroundColor3 = Color3.fromRGB(28, 28, 35)
 MiscTabBtn.TextColor3 = Color3.fromRGB(180, 180, 180)
-end)
-ThemesTabBtn.MouseButton1Click:Connect(function()
-if ModeMenuOpen then ToggleModeMenu() end
-if ThemesMenuOpen then ToggleThemesMenu() end
-if RankedModeOpen then ToggleRankedModeMenu() end
-FPSTab.Visible = false
-AutoTab.Visible = false
-AimTab.Visible = false
-RankedTab.Visible = false
-AutoTechsTab.Visible = false
-ThemesTab.Visible = true
-MiscTab.Visible = false
-ThemesTabBtn.BackgroundColor3 = Color3.fromRGB(35, 35, 45)
-ThemesTabBtn.TextColor3 = Color3.fromRGB(255, 0, 40)
-FPSTabBtn.BackgroundColor3 = Color3.fromRGB(28, 28, 35)
-FPSTabBtn.TextColor3 = Color3.fromRGB(180, 180, 180)
-AutoTabBtn.BackgroundColor3 = Color3.fromRGB(28, 28, 35)
-AutoTabBtn.TextColor3 = Color3.fromRGB(180, 180, 180)
-AimTabBtn.BackgroundColor3 = Color3.fromRGB(28, 28, 35)
-AimTabBtn.TextColor3 = Color3.fromRGB(180, 180, 180)
-RankedTabBtn.BackgroundColor3 = Color3.fromRGB(28, 28, 35)
-RankedTabBtn.TextColor3 = Color3.fromRGB(180, 180, 180)
-AutoTechsTabBtn.BackgroundColor3 = Color3.fromRGB(28, 28, 35)
-AutoTechsTabBtn.TextColor3 = Color3.fromRGB(180, 180, 180)
-MiscTabBtn.BackgroundColor3 = Color3.fromRGB(28, 28, 35)
-MiscTabBtn.TextColor3 = Color3.fromRGB(180, 180, 180)
-end)
-MiscTabBtn.MouseButton1Click:Connect(function()
-if ModeMenuOpen then ToggleModeMenu() end
-if ThemesMenuOpen then ToggleThemesMenu() end
-if RankedModeOpen then ToggleRankedModeMenu() end
-FPSTab.Visible = false
-AutoTab.Visible = false
-AimTab.Visible = false
-RankedTab.Visible = false
-AutoTechsTab.Visible = false
-ThemesTab.Visible = false
-MiscTab.Visible = true
-MiscTabBtn.BackgroundColor3 = Color3.fromRGB(35, 35, 45)
-MiscTabBtn.TextColor3 = Color3.fromRGB(255, 0, 40)
-FPSTabBtn.BackgroundColor3 = Color3.fromRGB(28, 28, 35)
-FPSTabBtn.TextColor3 = Color3.fromRGB(180, 180, 180)
-AutoTabBtn.BackgroundColor3 = Color3.fromRGB(28, 28, 35)
-AutoTabBtn.TextColor3 = Color3.fromRGB(180, 180, 180)
-AimTabBtn.BackgroundColor3 = Color3.fromRGB(28, 28, 35)
-AimTabBtn.TextColor3 = Color3.fromRGB(180, 180, 180)
-RankedTabBtn.BackgroundColor3 = Color3.fromRGB(28, 28, 35)
-RankedTabBtn.TextColor3 = Color3.fromRGB(180, 180, 180)
-AutoTechsTabBtn.BackgroundColor3 = Color3.fromRGB(28, 28, 35)
-AutoTechsTabBtn.TextColor3 = Color3.fromRGB(180, 180, 180)
-ThemesTabBtn.BackgroundColor3 = Color3.fromRGB(28, 28, 35)
-ThemesTabBtn.TextColor3 = Color3.fromRGB(180, 180, 180)
 end)
 BoostFPSBtn.MouseButton1Click:Connect(function()
 loadstring(game:HttpGet("https://raw.githubusercontent.com/stormzdev/the-strongest-battlegrounds/refs/heads/main/fps-boost.lua"))()
@@ -2513,175 +2513,6 @@ AutoUltToggle.SetState(false)
 end
 end)
 
-local AutoSupaEnabled = false
-local AutoSupaCooldown = 0
-local AutoSupaInCooldown = false
-
-local function AutoSupaGetCooldown()
-local n2 = 0
-pcall(function()
-n2 = Stats.Network.ServerStatsItem["Data Ping"]:GetValue()
-end)
-local v39 = n2 / 1000
-return (math.clamp(0.19 + v39 * 0.5, 0.05, 0.35))
-end
-
-local function AutoSupaRun()
-local Character = LocalPlayer.Character
-if not Character then
-Character = LocalPlayer.CharacterAdded:Wait()
-end
-local Humanoid = Character:WaitForChild("Humanoid")
-local HumanoidRootPart = Character:WaitForChild("HumanoidRootPart")
-local Animator = Humanoid:WaitForChild("Animator")
-
-Animator.AnimationPlayed:Connect(function(animation)
-if not AutoSupaEnabled or AutoSupaInCooldown then
-return
-end
-local Animation = animation.Animation
-if Animation then
-Animation = animation.Animation.AnimationId
-end
-if Animation ~= "rbxassetid://10503381238" then
-return
-end
-AutoSupaInCooldown = true
-if AutoSupaCooldown > 0 then
-task.wait(AutoSupaCooldown)
-end
-AutoSupaInCooldown = false
-task.wait(0.35)
-Humanoid:ChangeState(Enum.HumanoidStateType.Jumping)
-HumanoidRootPart.Velocity = Vector3.new(HumanoidRootPart.Velocity.X, 60, HumanoidRootPart.Velocity.Z)
-local Communicate = Character:WaitForChild("Communicate")
-local W = Enum.KeyCode.W
-local Q = Enum.KeyCode.Q
-Communicate:FireServer({
-Dash = W,
-Key = Q,
-Goal = "KeyPress"
-})
-task.delay(AutoSupaGetCooldown(), function()
-local CurrentCamera = workspace.CurrentCamera
-if CurrentCamera then
-local CurrentCameraCFrame = CurrentCamera.CFrame
-local LookVector = CurrentCameraCFrame.LookVector
-local v61 = -Vector3.new(LookVector.X, 0, LookVector.Z).Unit
-local vector3 = Vector3.new(v61.X, LookVector.Y, v61.Z)
-CurrentCamera.CFrame = CFrame.new(CurrentCameraCFrame.Position, CurrentCameraCFrame.Position + vector3)
-end
-end)
-end)
-end
-
-AutoSupaRun()
-LocalPlayer.CharacterAdded:Connect(function()
-task.wait(1)
-AutoSupaRun()
-end)
-
-AutoSupaToggle.SetCallback(function(state)
-AutoSupaEnabled = state
-end)
-
-local AutoSupaNewEnabled = false
-local SupaNewAttachment = nil
-local SupaNewTargetCharacter = nil
-local SupaNewDashAnim = "rbxassetid://10503381238"
-
-local function SupaNewGetCharacter()
-local char = LocalPlayer.Character or LocalPlayer.CharacterAdded:Wait()
-local humanoid = char:WaitForChild("Humanoid")
-local hrp = char:WaitForChild("HumanoidRootPart")
-local animator = humanoid:WaitForChild("Animator")
-return char, humanoid, hrp, animator
-end
-
-local function SupaNewGetClosestEnemy()
-local myHRP = LocalPlayer.Character and LocalPlayer.Character:FindFirstChild("HumanoidRootPart")
-if not myHRP then return nil end
-local closest, dist = nil, 25
-for _, plr in ipairs(Players:GetPlayers()) do
-if plr ~= LocalPlayer and plr.Character then
-local hrp = plr.Character:FindFirstChild("HumanoidRootPart")
-local hum = plr.Character:FindFirstChildOfClass("Humanoid")
-if hrp and hum and hum.Health > 0 then
-local d = (myHRP.Position - hrp.Position).Magnitude
-if d < dist then
-dist = d
-closest = plr.Character
-end
-end
-end
-end
-return closest
-end
-
-local function SupaNewAttachToTarget(targetChar)
-local myChar = LocalPlayer.Character
-if not myChar or not targetChar then return end
-local myHRP = myChar:FindFirstChild("HumanoidRootPart")
-local targetHRP = targetChar:FindFirstChild("HumanoidRootPart")
-if not myHRP or not targetHRP then return end
-if SupaNewAttachment then
-SupaNewAttachment:Destroy()
-SupaNewAttachment = nil
-end
-local weld = Instance.new("Weld")
-weld.Name = "SupaAttach"
-weld.Part0 = targetHRP
-weld.Part1 = myHRP
-weld.C0 = CFrame.new(0, 0, 0)
-weld.Parent = targetHRP
-SupaNewAttachment = weld
-SupaNewTargetCharacter = targetChar
-end
-
-local function SupaNewDetach()
-if SupaNewAttachment then
-SupaNewAttachment:Destroy()
-SupaNewAttachment = nil
-end
-SupaNewTargetCharacter = nil
-end
-
-local function SupaNewOnAnimationPlayed(animTrack)
-if not AutoSupaNewEnabled then return end
-local anim = animTrack.Animation
-if not anim or anim.AnimationId ~= SupaNewDashAnim then return end
-local target = SupaNewGetClosestEnemy()
-if target then
-SupaNewAttachToTarget(target)
-end
-animTrack.Stopped:Once(function()
-SupaNewDetach()
-end)
-task.delay(0.6, function()
-if SupaNewAttachment then
-SupaNewDetach()
-end
-end)
-end
-
-local function SupaNewSetup()
-local char, humanoid, hrp, animator = SupaNewGetCharacter()
-animator.AnimationPlayed:Connect(SupaNewOnAnimationPlayed)
-end
-
-SupaNewSetup()
-LocalPlayer.CharacterAdded:Connect(function()
-task.wait(1)
-SupaNewSetup()
-end)
-
-AutoSupaNewToggle.SetCallback(function(state)
-AutoSupaNewEnabled = state
-if not state then
-SupaNewDetach()
-end
-end)
-
 local CamlockState = false
 local Prediction = 0.16
 local Locked = true
@@ -2751,6 +2582,111 @@ end
 
 AimBotToggle.SetCallback(function(state)
 SetAimBot(state)
+end)
+
+local SupaEnabled = false
+local SupaAttachment = nil
+local SupaTargetCharacter = nil
+local SUPA_DASH_ANIM = "rbxassetid://10503381238"
+
+local function SupaGetCharacter()
+local char = LocalPlayer.Character or LocalPlayer.CharacterAdded:Wait()
+local humanoid = char:WaitForChild("Humanoid")
+local hrp = char:WaitForChild("HumanoidRootPart")
+local animator = humanoid:WaitForChild("Animator")
+return char, humanoid, hrp, animator
+end
+
+local function SupaGetClosestEnemy()
+local myHRP = LocalPlayer.Character and LocalPlayer.Character:FindFirstChild("HumanoidRootPart")
+if not myHRP then return nil end
+local closest, dist = nil, 25
+for _, plr in ipairs(Players:GetPlayers()) do
+if plr ~= LocalPlayer and plr.Character then
+local hrp = plr.Character:FindFirstChild("HumanoidRootPart")
+local hum = plr.Character:FindFirstChildOfClass("Humanoid")
+if hrp and hum and hum.Health > 0 then
+local d = (myHRP.Position - hrp.Position).Magnitude
+if d < dist then
+dist = d
+closest = plr.Character
+end
+end
+end
+end
+return closest
+end
+
+local function SupaAttachToTarget(targetChar)
+local myChar = LocalPlayer.Character
+if not myChar or not targetChar then return end
+local myHRP = myChar:FindFirstChild("HumanoidRootPart")
+local targetHRP = targetChar:FindFirstChild("HumanoidRootPart")
+if not myHRP or not targetHRP then return end
+if SupaAttachment then
+SupaAttachment:Destroy()
+SupaAttachment = nil
+end
+local weld = Instance.new("Weld")
+weld.Name = "SupaAttach"
+weld.Part0 = targetHRP
+weld.Part1 = myHRP
+weld.C0 = CFrame.new(0, 0, 0)
+weld.Parent = targetHRP
+SupaAttachment = weld
+SupaTargetCharacter = targetChar
+end
+
+local function SupaDetach()
+if SupaAttachment then
+SupaAttachment:Destroy()
+SupaAttachment = nil
+end
+SupaTargetCharacter = nil
+end
+
+local function SupaOnAnimationPlayed(animTrack)
+if not SupaEnabled then return end
+local anim = animTrack.Animation
+if not anim or anim.AnimationId ~= SUPA_DASH_ANIM then return end
+local target = SupaGetClosestEnemy()
+if target then
+SupaAttachToTarget(target)
+end
+animTrack.Stopped:Once(function()
+SupaDetach()
+end)
+task.delay(0.6, function()
+if SupaAttachment then
+SupaDetach()
+end
+end)
+end
+
+local function SupaSetup()
+local char, humanoid, hrp, animator = SupaGetCharacter()
+animator.AnimationPlayed:Connect(SupaOnAnimationPlayed)
+end
+
+local function SetSupaTech(state)
+SupaEnabled = state
+if not state then
+SupaDetach()
+end
+end
+
+SupaSetup()
+LocalPlayer.CharacterAdded:Connect(function()
+task.wait(1)
+SupaSetup()
+end)
+
+AutoK1ngToggle.SetCallback(function(state)
+SetSupaTech(state)
+end)
+
+AutoSupaToggle.SetCallback(function(state)
+SetSupaTech(state)
 end)
 
 local AntiRagdollEnabled = false
