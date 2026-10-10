@@ -622,10 +622,8 @@ InvisibleSubtext.ZIndex = 12
 InvisibleSubtext.Parent = InvisibleSubtextFrame
 local AntiRagdollToggle = CreateToggle("AntiRagdoll", "Anti Ragdoll", "Prevents ragdoll state", 7, MiscScroll)
 local AntiStunToggle = CreateToggle("AntiStun", "Anti Stun", "Prevents stun effects", 8, MiscScroll)
-
 local AutoK1NGToggle = CreateToggle("AutoK1NG", "Auto K1NG", "Auto tech on dash animation", 1, AutoTechsScroll)
 local AutoLoopDashToggle = CreateToggle("AutoLoopDash", "Auto loop dash", "Loops dash towards nearest enemy", 2, AutoTechsScroll)
-
 local FixCameraBtn = Instance.new("TextButton")
 FixCameraBtn.Name = "FixCameraBtn"
 FixCameraBtn.Size = UDim2.new(1, 0, 0, 36)
@@ -1499,7 +1497,6 @@ MiscTabBtn.Parent = Sidebar
 local UICornerMiscTab = Instance.new("UICorner")
 UICornerMiscTab.CornerRadius = UDim.new(0, 5)
 UICornerMiscTab.Parent = MiscTabBtn
-
 local AutoTechsTabBtn = Instance.new("TextButton")
 AutoTechsTabBtn.Name = "AutoTechsTabBtn"
 AutoTechsTabBtn.Size = UDim2.new(1, 0, 0, 32)
@@ -1514,7 +1511,6 @@ AutoTechsTabBtn.Parent = Sidebar
 local UICornerAutoTechsTab = Instance.new("UICorner")
 UICornerAutoTechsTab.CornerRadius = UDim.new(0, 5)
 UICornerAutoTechsTab.Parent = AutoTechsTabBtn
-
 FPSTabBtn.MouseButton1Click:Connect(function()
 if ModeMenuOpen then ToggleModeMenu() end
 if ThemesMenuOpen then ToggleThemesMenu() end
@@ -2732,81 +2728,81 @@ AntiStunToggle.SetCallback(function(state)
 SetAntiStun(state)
 end)
 
+
 local AutoK1NGEnabled = false
 local AutoK1NGCooldown = 0
 local AutoK1NGInCooldown = false
 
 local function AutoK1NGGetCooldown()
-    local n2 = 0
-    pcall(function()
-        local StatsService = game:GetService("Stats")
-        n2 = StatsService.Network.ServerStatsItem["Data Ping"]:GetValue()
-    end)
-    local v39 = n2 / 1000
-    return math.clamp(0.19 + v39 * 0.5, 0.05, 0.35)
+	local n2 = 0
+	pcall(function()
+		local StatsService = game:GetService("Stats")
+		n2 = StatsService.Network.ServerStatsItem["Data Ping"]:GetValue()
+	end)
+	local v39 = n2 / 1000
+	return math.clamp(0.19 + v39 * 0.5, 0.05, 0.35)
 end
 
 local function AutoK1NGRun()
-    local Character = LocalPlayer.Character
-    if not Character then
-        Character = LocalPlayer.CharacterAdded:Wait()
-    end
-    local Humanoid = Character:WaitForChild("Humanoid")
-    local HumanoidRootPart = Character:WaitForChild("HumanoidRootPart")
-    local Animator = Humanoid:WaitForChild("Animator")
+	local Character = LocalPlayer.Character
+	if not Character then
+		Character = LocalPlayer.CharacterAdded:Wait()
+	end
+	local Humanoid = Character:WaitForChild("Humanoid")
+	local HumanoidRootPart = Character:WaitForChild("HumanoidRootPart")
+	local Animator = Humanoid:WaitForChild("Animator")
 
-    Animator.AnimationPlayed:Connect(function(animationTrack)
-        if not AutoK1NGEnabled or AutoK1NGInCooldown then
-            return
-        end
-        local anim = animationTrack.Animation
-        if not anim then return end
-        local animId = anim.AnimationId
-        if animId ~= "rbxassetid://10503381238" then
-            return
-        end
-        AutoK1NGInCooldown = true
-        if AutoK1NGCooldown > 0 then
-            task.wait(AutoK1NGCooldown)
-        end
-        AutoK1NGInCooldown = false
-        task.wait(0.35)
-        pcall(function()
-            Humanoid:ChangeState(Enum.HumanoidStateType.Jumping)
-            HumanoidRootPart.Velocity = Vector3.new(HumanoidRootPart.Velocity.X, 60, HumanoidRootPart.Velocity.Z)
-            local Communicate = Character:FindFirstChild("Communicate")
-            if Communicate then
-                Communicate:FireServer({
-                    Dash = Enum.KeyCode.W,
-                    Key = Enum.KeyCode.Q,
-                    Goal = "KeyPress"
-                })
-            end
-        end)
-        task.delay(AutoK1NGGetCooldown(), function()
-            local CurrentCamera = workspace.CurrentCamera
-            if CurrentCamera then
-                local CurrentCameraCFrame = CurrentCamera.CFrame
-                local LookVector = CurrentCameraCFrame.LookVector
-                local v61 = -Vector3.new(LookVector.X, 0, LookVector.Z)
-                if v61.Magnitude > 0 then
-                    v61 = v61.Unit
-                    local vector3 = Vector3.new(v61.X, LookVector.Y, v61.Z)
-                    CurrentCamera.CFrame = CFrame.new(CurrentCameraCFrame.Position, CurrentCameraCFrame.Position + vector3)
-                end
-            end
-        end)
-    end)
+	Animator.AnimationPlayed:Connect(function(animationTrack)
+		if not AutoK1NGEnabled or AutoK1NGInCooldown then
+			return
+		end
+		local anim = animationTrack.Animation
+		if not anim then return end
+		if anim.AnimationId ~= "rbxassetid://10503381238" then
+			return
+		end
+		AutoK1NGInCooldown = true
+		if AutoK1NGCooldown > 0 then
+			task.wait(AutoK1NGCooldown)
+		end
+		AutoK1NGInCooldown = false
+		task.wait(0.35)
+		pcall(function()
+			Humanoid:ChangeState(Enum.HumanoidStateType.Jumping)
+			HumanoidRootPart.Velocity = Vector3.new(HumanoidRootPart.Velocity.X, 60, HumanoidRootPart.Velocity.Z)
+			local Communicate = Character:FindFirstChild("Communicate")
+			if Communicate then
+				Communicate:FireServer({
+					Dash = Enum.KeyCode.W,
+					Key = Enum.KeyCode.Q,
+					Goal = "KeyPress"
+				})
+			end
+		end)
+		task.delay(AutoK1NGGetCooldown(), function()
+			local CurrentCamera = workspace.CurrentCamera
+			if CurrentCamera then
+				local CurrentCameraCFrame = CurrentCamera.CFrame
+				local LookVector = CurrentCameraCFrame.LookVector
+				local v61 = -Vector3.new(LookVector.X, 0, LookVector.Z)
+				if v61.Magnitude > 0 then
+					v61 = v61.Unit
+					local vector3 = Vector3.new(v61.X, LookVector.Y, v61.Z)
+					CurrentCamera.CFrame = CFrame.new(CurrentCameraCFrame.Position, CurrentCameraCFrame.Position + vector3)
+				end
+			end
+		end)
+	end)
 end
 
 task.spawn(AutoK1NGRun)
 LocalPlayer.CharacterAdded:Connect(function()
-    task.wait(1)
-    task.spawn(AutoK1NGRun)
+	task.wait(1)
+	task.spawn(AutoK1NGRun)
 end)
 
 AutoK1NGToggle.SetCallback(function(state)
-    AutoK1NGEnabled = state
+	AutoK1NGEnabled = state
 end)
 
 local LoopDashEnabled = false
@@ -2816,160 +2812,160 @@ local CurrentTarget = nil
 local DASH_ANIM = "rbxassetid://10503381238"
 
 local function getCharacter()
-    local char = LocalPlayer.Character
-    if not char then return nil, nil, nil, nil end
-    local humanoid = char:FindFirstChildOfClass("Humanoid")
-    local hrp = char:FindFirstChild("HumanoidRootPart")
-    local animator = humanoid and humanoid:FindFirstChildOfClass("Animator")
-    return char, humanoid, hrp, animator
+	local char = LocalPlayer.Character
+	if not char then return nil, nil, nil, nil end
+	local humanoid = char:FindFirstChildOfClass("Humanoid")
+	local hrp = char:FindFirstChild("HumanoidRootPart")
+	local animator = humanoid and humanoid:FindFirstChildOfClass("Animator")
+	return char, humanoid, hrp, animator
 end
 
 local function getClosestEnemy()
-    local _, _, myHRP = getCharacter()
-    if not myHRP then return nil end
-    local closest, shortest = nil, math.huge
-    for _, plr in ipairs(Players:GetPlayers()) do
-        if plr ~= LocalPlayer and plr.Character then
-            local hum = plr.Character:FindFirstChildOfClass("Humanoid")
-            local hrp = plr.Character:FindFirstChild("HumanoidRootPart")
-            if hum and hum.Health > 0 and hrp then
-                local dist = (myHRP.Position - hrp.Position).Magnitude
-                if dist < shortest then
-                    shortest = dist
-                    closest = hrp
-                end
-            end
-        end
-    end
-    return closest
+	local _, _, myHRP = getCharacter()
+	if not myHRP then return nil end
+	local closest, shortest = nil, math.huge
+	for _, plr in ipairs(Players:GetPlayers()) do
+		if plr ~= LocalPlayer and plr.Character then
+			local hum = plr.Character:FindFirstChildOfClass("Humanoid")
+			local hrp = plr.Character:FindFirstChild("HumanoidRootPart")
+			if hum and hum.Health > 0 and hrp then
+				local dist = (myHRP.Position - hrp.Position).Magnitude
+				if dist < shortest then
+					shortest = dist
+					closest = hrp
+				end
+			end
+		end
+	end
+	return closest
 end
 
 local function fireDash()
-    local char = LocalPlayer.Character
-    if not char then return end
-    local communicate = char:FindFirstChild("Communicate")
-    if not communicate then return end
-    pcall(function()
-        communicate:FireServer({
-            Dash = Enum.KeyCode.W,
-            Key = Enum.KeyCode.Q,
-            Goal = "KeyPress"
-        })
-    end)
+	local char = LocalPlayer.Character
+	if not char then return end
+	local communicate = char:FindFirstChild("Communicate")
+	if not communicate then return end
+	pcall(function()
+		communicate:FireServer({
+			Dash = Enum.KeyCode.W,
+			Key = Enum.KeyCode.Q,
+			Goal = "KeyPress"
+		})
+	end)
 end
 
 local function onAnimationPlayed(track)
-    if not LoopDashEnabled then return end
-    local anim = track.Animation
-    if not anim then return end
-    local id = tostring(anim.AnimationId or "")
-    if id ~= DASH_ANIM and not string.find(id, "10503381238") then
-        return
-    end
-    CurrentTarget = getClosestEnemy()
-    local renderConn
-    renderConn = RunService.RenderStepped:Connect(function()
-        if not LoopDashEnabled then
-            if renderConn then renderConn:Disconnect() end
-            return
-        end
-        local playing = false
-        pcall(function() playing = track.IsPlaying end)
-        if not playing then
-            local _, _, hrp = getCharacter()
-            if hrp then
-                pcall(function()
-                    hrp.CFrame = hrp.CFrame - (hrp.CFrame.LookVector * 4.5)
-                end)
-            end
-            fireDash()
-            if renderConn then renderConn:Disconnect() end
-            return
-        end
-        local remaining = 999
-        pcall(function()
-            remaining = track.Length - track.TimePosition
-        end)
-        if remaining <= 0.3 then
-            local _, _, hrp = getCharacter()
-            if hrp then
-                pcall(function()
-                    hrp.CFrame = hrp.CFrame - (hrp.CFrame.LookVector * 4.5)
-                end)
-            end
-            fireDash()
-        end
-    end)
-    task.delay(2.7, function()
-        if renderConn then
-            pcall(function() renderConn:Disconnect() end)
-        end
-    end)
+	if not LoopDashEnabled then return end
+	local anim = track.Animation
+	if not anim then return end
+	local id = tostring(anim.AnimationId or "")
+	if id ~= DASH_ANIM and not string.find(id, "10503381238") then
+		return
+	end
+	CurrentTarget = getClosestEnemy()
+	local renderConn
+	renderConn = RunService.RenderStepped:Connect(function()
+		if not LoopDashEnabled then
+			if renderConn then renderConn:Disconnect() end
+			return
+		end
+		local playing = false
+		pcall(function() playing = track.IsPlaying end)
+		if not playing then
+			local _, _, hrp = getCharacter()
+			if hrp then
+				pcall(function()
+					hrp.CFrame = hrp.CFrame - (hrp.CFrame.LookVector * 4.5)
+				end)
+			end
+			fireDash()
+			if renderConn then renderConn:Disconnect() end
+			return
+		end
+		local remaining = 999
+		pcall(function()
+			remaining = track.Length - track.TimePosition
+		end)
+		if remaining <= 0.3 then
+			local _, _, hrp = getCharacter()
+			if hrp then
+				pcall(function()
+					hrp.CFrame = hrp.CFrame - (hrp.CFrame.LookVector * 4.5)
+				end)
+			end
+			fireDash()
+		end
+	end)
+	task.delay(2.7, function()
+		if renderConn then
+			pcall(function() renderConn:Disconnect() end)
+		end
+	end)
 end
 
 local function startLoopDash()
-    local char, humanoid, hrp, animator = getCharacter()
-    if not animator then return end
-    if AnimConnection then
-        pcall(function() AnimConnection:Disconnect() end)
-        AnimConnection = nil
-    end
-    if FaceConnection then
-        pcall(function() FaceConnection:Disconnect() end)
-        FaceConnection = nil
-    end
-    AnimConnection = animator.AnimationPlayed:Connect(onAnimationPlayed)
-    FaceConnection = RunService.RenderStepped:Connect(function()
-        if not LoopDashEnabled then return end
-        if not CurrentTarget or not CurrentTarget.Parent then return end
-        local _, _, myHRP = getCharacter()
-        if not myHRP then return end
-        local targetHum = CurrentTarget.Parent:FindFirstChildOfClass("Humanoid")
-        if targetHum and targetHum.Health > 0 then
-            pcall(function()
-                myHRP.CFrame = CFrame.lookAt(
-                    myHRP.Position,
-                    Vector3.new(CurrentTarget.Position.X, myHRP.Position.Y, CurrentTarget.Position.Z)
-                )
-                local cam = workspace.CurrentCamera
-                if cam then
-                    cam.CFrame = CFrame.lookAt(cam.CFrame.Position, CurrentTarget.Position)
-                end
-            end)
-        end
-    end)
+	local char, humanoid, hrp, animator = getCharacter()
+	if not animator then return end
+	if AnimConnection then
+		pcall(function() AnimConnection:Disconnect() end)
+		AnimConnection = nil
+	end
+	if FaceConnection then
+		pcall(function() FaceConnection:Disconnect() end)
+		FaceConnection = nil
+	end
+	AnimConnection = animator.AnimationPlayed:Connect(onAnimationPlayed)
+	FaceConnection = RunService.RenderStepped:Connect(function()
+		if not LoopDashEnabled then return end
+		if not CurrentTarget or not CurrentTarget.Parent then return end
+		local _, _, myHRP = getCharacter()
+		if not myHRP then return end
+		local targetHum = CurrentTarget.Parent:FindFirstChildOfClass("Humanoid")
+		if targetHum and targetHum.Health > 0 then
+			pcall(function()
+				myHRP.CFrame = CFrame.lookAt(
+					myHRP.Position,
+					Vector3.new(CurrentTarget.Position.X, myHRP.Position.Y, CurrentTarget.Position.Z)
+				)
+				local cam = workspace.CurrentCamera
+				if cam then
+					cam.CFrame = CFrame.lookAt(cam.CFrame.Position, CurrentTarget.Position)
+				end
+			end)
+		end
+	end)
 end
 
 local function stopLoopDash()
-    if AnimConnection then
-        pcall(function() AnimConnection:Disconnect() end)
-        AnimConnection = nil
-    end
-    if FaceConnection then
-        pcall(function() FaceConnection:Disconnect() end)
-        FaceConnection = nil
-    end
-    CurrentTarget = nil
+	if AnimConnection then
+		pcall(function() AnimConnection:Disconnect() end)
+		AnimConnection = nil
+	end
+	if FaceConnection then
+		pcall(function() FaceConnection:Disconnect() end)
+		FaceConnection = nil
+	end
+	CurrentTarget = nil
 end
 
 local function SetLoopDash(state)
-    LoopDashEnabled = state
-    if state then
-        startLoopDash()
-    else
-        stopLoopDash()
-    end
+	LoopDashEnabled = state
+	if state then
+		startLoopDash()
+	else
+		stopLoopDash()
+	end
 end
 
 LocalPlayer.CharacterAdded:Connect(function()
-    task.wait(1)
-    if LoopDashEnabled then
-        startLoopDash()
-    end
+	task.wait(1)
+	if LoopDashEnabled then
+		startLoopDash()
+	end
 end)
 
 AutoLoopDashToggle.SetCallback(function(state)
-    SetLoopDash(state)
+	SetLoopDash(state)
 end)
 
 
